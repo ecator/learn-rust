@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learn Rust | Interactive Rust Learning Platform</title>
+
+    <!-- SPA Redirect Restoration for GitHub Pages -->
+    <script>
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location));
+    </script>
+
+    <!-- Anti-FOUC Theme Detector: check localStorage or system preference -->
+    <script>
+      (function() {
+        try {
+          var stored = null;
+          try {
+            stored = localStorage.getItem('learn_rust_theme');
+          } catch (_) {}
+          var systemDark = Boolean(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var isDark = stored === 'dark' || (stored !== 'light' && systemDark);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Language Auto-Detection: check localStorage or navigator.language (fallback to 'zh') -->
+    <script>
+      (function() {
+        try {
+          var stored = null;
+          try {
+            stored = localStorage.getItem('learn_rust_lang');
+          } catch (_) {}
+          if (stored === 'zh' || stored === 'en' || stored === 'ja') {
+            document.documentElement.lang = stored;
+            return;
+          }
+          var navLang = (navigator.language || '').toLowerCase();
+          var detected = 'zh';
+          if (navLang.startsWith('en')) detected = 'en';
+          else if (navLang.startsWith('ja')) detected = 'ja';
+          document.documentElement.lang = detected;
+        } catch (e) {
+          document.documentElement.lang = 'zh';
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased transition-colors duration-200">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
