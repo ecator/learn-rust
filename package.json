@@ -1,5 +1,6 @@
 {
   "name": "learn-rust",
+  "description": "An interactive, zero-to-mastery Rust learning web application built as a pure client-side SPA.",
   "private": true,
   "version": "0.1.0",
   "type": "module",
