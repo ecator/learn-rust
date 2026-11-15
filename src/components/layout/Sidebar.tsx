@@ -174,7 +174,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <Globe className="h-3.5 w-3.5 text-[#CE412B]" />
             <span>{t('sidebar.languageSwitcher')}</span>
           </div>
-          <div className="grid grid-cols-3 gap-1.5" data-testid="sidebar-language-switcher">
+          <div
+            className="grid grid-cols-3 gap-1.5"
+            data-testid="sidebar-language-switcher"
+            data-cursor="language"
+            data-cursor-variant="cycle"
+          >
             {([
               { code: 'zh' as const, label: '简体中文' },
               { code: 'en' as const, label: 'English' },
@@ -189,6 +194,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   aria-pressed={active}
                   aria-label={`${t('sidebar.languageSwitcher')}: ${opt.label}`}
                   data-testid={`sidebar-lang-${opt.code}`}
+                  data-cursor="language"
+                  data-cursor-variant={opt.code}
                   className={cn(
                     'rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition-colors',
                     active
@@ -209,7 +216,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <Monitor className="h-3.5 w-3.5 text-[#CE412B]" />
             <span>{t('sidebar.themeSwitcher')}</span>
           </div>
-          <div className="grid grid-cols-3 gap-1.5" data-testid="sidebar-theme-switcher">
+          <div
+            className="grid grid-cols-3 gap-1.5"
+            data-testid="sidebar-theme-switcher"
+            data-cursor="theme"
+            data-cursor-variant={theme}
+          >
             {THEME_OPTIONS.map((opt) => {
               const Icon = sidebarThemeIcons[opt.mode];
               const active = theme === opt.mode;
@@ -222,6 +234,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   aria-pressed={active}
                   aria-label={`${t('sidebar.themeSwitcher')}: ${label}`}
                   data-testid={`sidebar-theme-${opt.mode}`}
+                  data-cursor="theme"
+                  data-cursor-variant={opt.mode}
                   className={cn(
                     'inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition-colors',
                     active

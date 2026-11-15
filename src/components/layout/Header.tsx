@@ -161,6 +161,8 @@ export const Header: React.FC<HeaderProps> = ({
             role="group"
             aria-label={t('nav.languageLabel')}
             data-testid="language-switcher"
+            data-cursor="language"
+            data-cursor-variant="cycle"
             className="hidden md:inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90"
           >
             <button
@@ -168,6 +170,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={cycleLanguage}
               aria-label="Change language (ZH / EN / JA)"
               data-testid="language-cycle-button"
+              data-cursor="language"
+              data-cursor-variant="cycle"
               title={t('nav.languageToggle')}
               className="inline-flex items-center justify-center rounded-full p-1.5 text-[#CE412B] hover:bg-white dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE412B]"
             >
@@ -182,6 +186,8 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => selectLanguage(option.code)}
                   aria-pressed={active}
                   data-testid={`lang-option-${option.code}`}
+                  data-cursor="language"
+                  data-cursor-variant={option.code}
                   title={option.title}
                   className={cn(
                     'rounded-full px-1.5 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-[#CE412B]',
@@ -201,6 +207,8 @@ export const Header: React.FC<HeaderProps> = ({
             role="group"
             aria-label={t('nav.themeLabel')}
             data-testid="theme-switcher"
+            data-cursor="theme"
+            data-cursor-variant={theme}
             className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90"
           >
             {THEME_OPTIONS.map((option) => {
@@ -216,6 +224,8 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-pressed={active}
                   aria-label={toggleLabel}
                   data-testid={`theme-option-${option.mode}`}
+                  data-cursor="theme"
+                  data-cursor-variant={option.mode}
                   title={toggleLabel}
                   className={cn(
                     'inline-flex items-center justify-center gap-1 rounded-full p-1.5 md:px-2.5 md:py-1 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-[#CE412B]',

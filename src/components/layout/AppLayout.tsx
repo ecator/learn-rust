@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Footer } from '@/components/layout/Footer';
 import { MobileNav } from '@/components/layout/MobileNav';
+import { CrabCursor } from '@/components/cursor/CrabCursor';
 import { ThemeProvider } from '@/lib/theme';
 import { I18nProvider } from '@/lib/i18n';
 
@@ -43,6 +44,9 @@ export const AppLayout: React.FC = () => {
 
           {/* Mobile Bottom Navigation */}
           <MobileNav />
+
+          {/* Custom Interactive Crab Claw Cursor */}
+          <CrabCursor />
         </div>
       </I18nProvider>
     </ThemeProvider>
