@@ -26,6 +26,5 @@
     },
     "types": ["vite/client"]
   },
-  "include": ["src"],
-  "exclude": ["src/**/__tests__/*", "src/test/*", "src/tests/*", "**/*.test.ts", "**/*.test.tsx"]
+  "include": ["src"]
 }

@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:e2e": "vitest run src/tests/e2e"
+    "test:e2e": "vitest run tests/e2e"
   },
   "dependencies": {
     "clsx": "^2.1.1",

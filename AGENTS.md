@@ -67,12 +67,15 @@ learn-rust/
 │   ├── lib/
 │   │   ├── storage.ts              # LocalStorage progress persistence engine
 │   │   └── utils.ts                # Tailwind cn utility
-│   ├── tests/
-│   │   └── e2e/                    # Vitest + Testing Library E2E test suites
-│   │       ├── helpers/            # render-app, storage-mock, viewport, visualizer-driver
-│   │       └── tier1-features/     # T1 Feature Coverage suites
 │   ├── App.tsx                     # Top-level RouterProvider
 │   └── main.tsx                    # React 19 createRoot entry point
+├── tests/
+│   ├── setup.ts                    # Happy-DOM & global test environment setup
+│   ├── unit/                       # Unit & component tests mirroring src/
+│   ├── adversarial/                # Adversarial layout & theming resilience tests
+│   └── e2e/                        # Vitest + Testing Library E2E test suites
+│       ├── helpers/                # render-app, storage-mock, viewport, visualizer-driver
+│       └── tier1-features/         # T1 Feature Coverage suites
 ├── vite.config.ts                  # Base path and Tailwind plugins
 └── vitest.config.ts                # Happy-DOM test configuration
 ```
@@ -97,7 +100,7 @@ learn-rust/
 ## 4. Testing & Quality Standards
 
 - **Runner**: Vitest with `happy-dom` environment.
-- **Opaque-Box Testing**: All test suites in `src/tests/e2e/` must interact through accessible roles (`getByRole`, `within`), labels (`getByLabelText`), or standard DOM text. Avoid reaching into private component state.
+- **Opaque-Box Testing**: All test suites in `tests/e2e/` must interact through accessible roles (`getByRole`, `within`), labels (`getByLabelText`), or standard DOM text. Avoid reaching into private component state.
 - **Execution**: Run `pnpm test:run` or `pnpm test:e2e` to verify changes.
 
 ---
@@ -111,6 +114,6 @@ Tailwind v4 is loaded as a Vite plugin via `@tailwindcss/vite` instead of a Post
 The app is hosted at `/learn-rust/`. All route links must use relative React Router paths (`/curriculum`, `/visualizers`), while Vite handles the base path prefix automatically. Direct deep links in production are restored via `public/404.html`.
 
 ### 5.3 Happy-DOM Test Quirks
-- For media queries, use `createMatchMediaMock()` in `src/tests/e2e/setup.ts`.
+- For media queries, use `createMatchMediaMock()` in `tests/setup.ts`.
 - When asserting clipboard writes, mock `navigator.clipboard` using `Object.defineProperty`.
 - Always reset `localStorage` and `document.documentElement` before each test.
