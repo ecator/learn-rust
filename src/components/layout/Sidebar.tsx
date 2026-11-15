@@ -1,6 +1,7 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { VISUALIZER_FOCUS_EVENT } from '@/components/visualizers/types';
 import {
   BookOpen,
   Layers,
@@ -122,6 +123,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     },
   ];
 
+  const isOnVisualizersPage = location.pathname.replace(/\/+$/, '') === '/visualizers';
+
+  const handleVisualizerClick = (slug: string | null) => {
+    onClose();
+    if (isOnVisualizersPage && typeof window !== 'undefined') {
+      const targetHash = slug ? `#${slug}` : '';
+      if (location.hash === targetHash) {
+        window.dispatchEvent(
+          new CustomEvent<string | null>(VISUALIZER_FOCUS_EVENT, { detail: slug })
+        );
+      }
+    }
+  };
+
   const handleSelectLanguage = (lang: SupportedLanguage) => {
     setLanguage(lang);
     if (typeof document !== 'undefined') {
@@ -147,8 +162,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <aside
         aria-label="Curriculum Sidebar"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white border-r border-slate-200 dark:bg-slate-900 dark:border-slate-800 transition-transform duration-300 ease-in-out lg:static lg:z-0 lg:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white border-r border-slate-200 dark:bg-slate-900 dark:border-slate-800 max-lg:transition-transform max-lg:duration-300 max-lg:ease-in-out lg:sticky lg:top-16 lg:bottom-auto lg:inset-x-auto lg:h-[calc(100vh-4rem)] lg:self-start lg:shrink-0 lg:z-20',
+          isOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'
         )}
       >
         {/* Drawer Header (mobile only) */}
@@ -260,26 +275,44 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <Layers className="h-3.5 w-3.5 text-[#CE412B]" />
                 {t('sidebar.interactiveVisualizers')}
               </span>
-              <NavLink
+              <Link
                 to="/visualizers"
-                onClick={onClose}
-                className="text-[11px] font-medium text-[#CE412B] hover:underline"
+                onClick={() => handleVisualizerClick(null)}
+                className={cn(
+                  'text-[11px] text-[#CE412B] hover:underline',
+                  isOnVisualizersPage && !location.hash ? 'font-bold' : 'font-medium'
+                )}
               >
                 {t('common.all')}
-              </NavLink>
+              </Link>
             </div>
             <div className="space-y-1">
-              {visualizerLinks.map((vis) => (
-                <NavLink
-                  key={vis.slug}
-                  to={`/visualizers#${vis.slug}`}
-                  onClick={onClose}
-                  className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80 transition-colors"
-                >
-                  <span className="truncate">{vis.title}</span>
-                  <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
-                </NavLink>
-              ))}
+              {visualizerLinks.map((vis) => {
+                const isCurrent =
+                  isOnVisualizersPage && location.hash === `#${vis.slug}`;
+                return (
+                  <Link
+                    key={vis.slug}
+                    to={`/visualizers#${vis.slug}`}
+                    onClick={() => handleVisualizerClick(vis.slug)}
+                    aria-current={isCurrent ? 'location' : undefined}
+                    className={cn(
+                      'flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors',
+                      isCurrent
+                        ? 'bg-[#CE412B]/10 text-[#CE412B] font-semibold dark:bg-[#CE412B]/20'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-white'
+                    )}
+                  >
+                    <span className="truncate">{vis.title}</span>
+                    <ChevronRight
+                      className={cn(
+                        'h-3 w-3 shrink-0 transition-transform',
+                        isCurrent ? 'text-[#CE412B] translate-x-0.5' : 'text-slate-400'
+                      )}
+                    />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

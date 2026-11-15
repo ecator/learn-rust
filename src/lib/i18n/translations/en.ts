@@ -201,6 +201,7 @@ export const en: TranslationDictionary = {
     simulatedFeatures: 'Simulated Features',
     readTheory: 'Read Accompanying Theory',
     statusReady: 'Ready in M3',
+    statusSelected: 'Selected',
     catAll: 'All',
     catOwnership: 'Ownership & Memory',
     catLifetimes: 'Lifetimes & Borrows',

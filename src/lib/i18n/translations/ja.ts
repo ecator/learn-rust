@@ -201,6 +201,7 @@ export const ja: TranslationDictionary = {
     simulatedFeatures: 'シミュレーション機能',
     readTheory: '関連レッスンと解説を読む',
     statusReady: '利用可能',
+    statusSelected: '選択中',
     catAll: 'すべて (All)',
     catOwnership: '所有権とメモリ',
     catLifetimes: '借用とライフタイム',

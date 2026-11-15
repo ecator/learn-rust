@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   Layers,
   ShieldCheck,
@@ -11,7 +11,8 @@ import {
   Search,
   RotateCcw,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { VISUALIZER_FOCUS_EVENT } from '@/components/visualizers/types';
 import { OwnershipVisualizer } from '@/components/visualizers/OwnershipVisualizer';
 import { BorrowCheckerVisualizer } from '@/components/visualizers/BorrowCheckerVisualizer';
 import { MemoryLayoutVisualizer } from '@/components/visualizers/MemoryLayoutVisualizer';
@@ -234,10 +235,69 @@ const categories: Array<{ key: VisualizerCategory; labelKey: string }> = [
   { key: 'Concurrency & Errors', labelKey: 'gallery.catConcurrency' },
 ];
 
+const VALID_VISUALIZER_IDS = new Set(visualizers.map((vis) => vis.id));
+
+function getPreferredScrollBehavior(): ScrollBehavior {
+  if (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return 'auto';
+  }
+  return 'smooth';
+}
+
 export const VisualizersGallery: React.FC = () => {
   const { language, t } = useI18n();
+  const location = useLocation();
+  const hashId = location.hash.replace(/^#/, '');
+  const activeVisualizerId = VALID_VISUALIZER_IDS.has(hashId) ? hashId : null;
+
   const [selectedCategory, setSelectedCategory] = useState<VisualizerCategory>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<string | null | undefined>(() =>
+    activeVisualizerId ? activeVisualizerId : undefined
+  );
+  const prevHashIdRef = useRef<string | null>(activeVisualizerId);
+
+  const handleResetFilters = useCallback(() => {
+    setSelectedCategory('All');
+    setSearchQuery('');
+  }, []);
+
+  const focusTarget = useCallback(
+    (targetId: string | null) => {
+      handleResetFilters();
+      setPendingScrollTarget(targetId);
+    },
+    [handleResetFilters]
+  );
+
+  useEffect(() => {
+    const prevHashId = prevHashIdRef.current;
+    prevHashIdRef.current = activeVisualizerId;
+
+    if (activeVisualizerId) {
+      focusTarget(activeVisualizerId);
+    } else if (prevHashId !== null) {
+      focusTarget(null);
+    }
+  }, [activeVisualizerId, location.key, focusTarget]);
+
+  useEffect(() => {
+    const handleFocusRequest = (event: Event) => {
+      const slug = (event as CustomEvent<string | null>).detail;
+      if (slug === null || (typeof slug === 'string' && VALID_VISUALIZER_IDS.has(slug))) {
+        focusTarget(slug);
+      }
+    };
+
+    window.addEventListener(VISUALIZER_FOCUS_EVENT, handleFocusRequest);
+    return () => {
+      window.removeEventListener(VISUALIZER_FOCUS_EVENT, handleFocusRequest);
+    };
+  }, [focusTarget]);
 
   const filteredVisualizers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -263,10 +323,34 @@ export const VisualizersGallery: React.FC = () => {
     });
   }, [selectedCategory, searchQuery, language]);
 
-  const handleResetFilters = () => {
-    setSelectedCategory('All');
-    setSearchQuery('');
-  };
+  useEffect(() => {
+    if (pendingScrollTarget === undefined) return;
+
+    const executeScroll = () => {
+      const behavior = getPreferredScrollBehavior();
+      if (pendingScrollTarget === null) {
+        if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+          window.scrollTo({ top: 0, behavior });
+        }
+        setPendingScrollTarget(undefined);
+        return;
+      }
+
+      const targetEl = document.getElementById(pendingScrollTarget);
+      if (!targetEl) return;
+
+      if (typeof targetEl.scrollIntoView === 'function') {
+        targetEl.scrollIntoView({ behavior, block: 'start' });
+      }
+      setPendingScrollTarget(undefined);
+    };
+
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      const rafId = window.requestAnimationFrame(executeScroll);
+      return () => window.cancelAnimationFrame(rafId);
+    }
+    executeScroll();
+  }, [pendingScrollTarget, filteredVisualizers]);
 
   const renderVisualizer = (id: string) => {
     switch (id) {
@@ -370,20 +454,33 @@ export const VisualizersGallery: React.FC = () => {
           {filteredVisualizers.map((vis) => {
             const Icon = vis.icon;
             const localized = vis.translations[language] ?? vis.translations.en;
+            const isSelected = activeVisualizerId === vis.id;
             return (
               <div
                 key={vis.id}
                 id={vis.id}
-                className={`flex flex-col justify-between rounded-3xl border bg-gradient-to-b p-6 sm:p-7 shadow-sm transition-all hover:shadow-lg dark:bg-slate-900/60 ${vis.color}`}
+                data-selected={isSelected ? 'true' : 'false'}
+                className={`scroll-mt-24 flex flex-col justify-between rounded-3xl border bg-gradient-to-b p-6 sm:p-7 transition-all duration-300 hover:shadow-lg dark:bg-slate-900/60 ${vis.color} ${
+                  isSelected
+                    ? 'ring-2 ring-[#CE412B] ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-950 border-[#CE412B] dark:border-[#CE412B] shadow-xl shadow-[#CE412B]/15'
+                    : 'shadow-sm'
+                }`}
               >
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="rounded-2xl bg-white/80 p-3 shadow-sm dark:bg-slate-800">
                       <Icon className="h-6 w-6" />
                     </div>
-                    <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-xs dark:bg-slate-800 dark:text-slate-200">
-                      {t('gallery.statusReady')}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {isSelected && (
+                        <span className="rounded-full bg-[#CE412B] px-2.5 py-1 text-[11px] font-bold text-white shadow-xs">
+                          {t('gallery.statusSelected')}
+                        </span>
+                      )}
+                      <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-xs dark:bg-slate-800 dark:text-slate-200">
+                        {t('gallery.statusReady')}
+                      </span>
+                    </div>
                   </div>
 
                   <div>

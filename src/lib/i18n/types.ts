@@ -201,6 +201,7 @@ export interface TranslationDictionary {
     simulatedFeatures: string;
     readTheory: string;
     statusReady: string;
+    statusSelected: string;
     catAll: string;
     catOwnership: string;
     catLifetimes: string;

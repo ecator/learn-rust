@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { screen, within, act } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { screen, within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderApp } from '../helpers/render-app';
 import { setViewport, setSystemThemePreference } from '../helpers/viewport';
@@ -7,11 +7,24 @@ import { createMatchMediaMock } from '../../setup';
 
 describe('Tier 1: Layout, Theming & i18n (F04 - F06)', () => {
   const user = userEvent.setup();
+  const originalScrollIntoViewDesc = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'scrollIntoView'
+  );
 
   beforeEach(() => {
     localStorage.clear();
     document.documentElement.className = '';
     document.documentElement.lang = 'zh';
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    if (originalScrollIntoViewDesc) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', originalScrollIntoViewDesc);
+    } else {
+      delete (HTMLElement.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+    }
   });
 
   // ==========================================
@@ -87,6 +100,60 @@ describe('Tier 1: Layout, Theming & i18n (F04 - F06)', () => {
         name: /(The Complete Rust Learning Path|Curriculum)/i,
       });
       expect(curriculumHeading).toBeInTheDocument();
+    });
+
+    it('TC-T1-F04-06: Sidebar Interactive Visualizers Links Scroll, Highlight & Clear', async () => {
+      setViewport('desktop');
+      const scrollIntoViewMock = vi.fn();
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+        configurable: true,
+        writable: true,
+        value: scrollIntoViewMock,
+      });
+
+      const { container } = renderApp({ route: '/learn-rust/visualizers', language: 'zh' });
+      const sidebar = screen.getByRole('complementary', { name: /Curriculum Sidebar/i });
+
+      const items = [
+        { label: '所有权与移动', id: 'ownership' },
+        { label: '借用检查与生命周期', id: 'borrow-checker' },
+        { label: '内存布局与堆栈', id: 'memory-layout' },
+        { label: 'Trait 分发机制', id: 'trait-dispatch' },
+        { label: '并发与线程模型', id: 'concurrency' },
+        { label: '错误处理与 Result', id: 'railway-errors' },
+      ];
+
+      for (const item of items) {
+        scrollIntoViewMock.mockClear();
+        const link = within(sidebar).getByRole('link', { name: item.label });
+        await user.click(link);
+
+        expect(link).toHaveAttribute('aria-current', 'location');
+        const targetCard = container.querySelector(`#${item.id}`);
+        expect(targetCard).toHaveAttribute('data-selected', 'true');
+        expect(container.querySelectorAll('[data-selected="true"]')).toHaveLength(1);
+
+        await waitFor(() => {
+          expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+        });
+        expect(scrollIntoViewMock.mock.instances[0]).toBe(targetCard);
+      }
+
+      // Clicking the already-active item again still scrolls to it
+      scrollIntoViewMock.mockClear();
+      await user.click(within(sidebar).getByRole('link', { name: '错误处理与 Result' }));
+      await waitFor(() => {
+        expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+      });
+
+      // Clicking "全部" resets selection and scrolls to top
+      const allLink = within(sidebar).getByRole('link', { name: '全部' });
+      await user.click(allLink);
+
+      expect(container.querySelectorAll('[data-selected="true"]')).toHaveLength(0);
+      await waitFor(() => {
+        expect(window.scrollTo).toHaveBeenCalled();
+      });
     });
   });
 

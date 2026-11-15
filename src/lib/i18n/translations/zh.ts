@@ -201,6 +201,7 @@ export const zh: TranslationDictionary = {
     simulatedFeatures: '支持模拟的核心特性',
     readTheory: '阅读配套教程与测验',
     statusReady: '交互就绪',
+    statusSelected: '当前选中',
     catAll: '全部 (All)',
     catOwnership: '所有权与内存',
     catLifetimes: '借用与生命周期',

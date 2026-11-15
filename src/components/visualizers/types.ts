@@ -12,3 +12,5 @@ export interface VisualizerProps {
   onComplete?: () => void;
   className?: string;
 }
+
+export const VISUALIZER_FOCUS_EVENT = 'learn_rust_visualizer_focus';
