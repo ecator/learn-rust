@@ -43,14 +43,20 @@ describe('Tier 2: Curriculum & CI/CD Boundaries (F15 - F18)', () => {
 
     it('TC-T2-F15-03: Lesson code snippet contains horizontal scroll class', () => {
       renderApp({ route: '/learn-rust/lessons/hello-ferris' });
-      const pre = screen.getByText(/fn main\(\)/i).closest('pre');
+      const codeEl = screen.getByText(
+        (_, node) => node?.tagName.toLowerCase() === 'code' && /fn main\(\)/i.test(node.textContent ?? '')
+      );
+      const pre = codeEl.closest('pre');
       expect(pre).toBeInTheDocument();
       expect(pre?.className).toMatch(/overflow-x-auto/);
     });
 
     it('TC-T2-F15-04: Script tags inside lesson code are rendered strictly as text', () => {
       renderApp({ route: '/learn-rust/lessons/ownership-move' });
-      const pre = screen.getByText(/fn main\(\)/i).closest('pre');
+      const codeEl = screen.getByText(
+        (_, node) => node?.tagName.toLowerCase() === 'code' && /fn main\(\)/i.test(node.textContent ?? '')
+      );
+      const pre = codeEl.closest('pre');
       expect(pre).toBeInTheDocument();
       expect(document.querySelectorAll('script[src*="malicious"]').length).toBe(0);
     });

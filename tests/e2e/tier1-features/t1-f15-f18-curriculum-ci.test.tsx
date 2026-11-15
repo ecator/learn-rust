@@ -56,6 +56,11 @@ describe('Tier 1: Curriculum, Quizzes, CI/CD & Docs (F15 - F18)', () => {
       expect(preBlock).toBeInTheDocument();
       expect(codeBlock).toBeInTheDocument();
       expect(codeBlock?.textContent).toMatch(/fn main\(\)/);
+      expect(codeBlock?.querySelector('[data-token-type="keyword"]')).toHaveTextContent('fn');
+      expect(codeBlock?.querySelector('[data-token-type="function"]')).toHaveTextContent('main');
+      expect(codeBlock?.querySelector('[data-token-type="macro"]')).toHaveTextContent('println!');
+      expect(codeBlock?.querySelector('[data-token-type="string"]')).toBeInTheDocument();
+      expect(codeBlock?.querySelector('[data-token-type="comment"]')).toBeInTheDocument();
     });
 
     it('TC-T1-F15-04: Common Pitfalls Section', () => {

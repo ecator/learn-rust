@@ -64,7 +64,11 @@ describe('Tier 4: Real-World Application End-to-End Journeys', () => {
     expect(
       await screen.findByRole('heading', { name: /你好 Ferris 与 Cargo 基础/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/fn main\(\)/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, node) => node?.tagName.toLowerCase() === 'code' && /fn main\(\)/i.test(node.textContent ?? '')
+      )
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/Hello, Ferris! 🦀/i).length).toBeGreaterThan(0);
 
     // Complete Module 1 in progress

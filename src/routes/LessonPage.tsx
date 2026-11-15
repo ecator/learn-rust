@@ -10,8 +10,10 @@ import {
   BookOpen,
   AlertTriangle,
   Check,
+  Copy,
   Terminal,
 } from 'lucide-react';
+import { RustCodeBlock } from '@/components/common/RustCodeBlock';
 import { OwnershipVisualizer } from '@/components/visualizers/OwnershipVisualizer';
 import { BorrowCheckerVisualizer } from '@/components/visualizers/BorrowCheckerVisualizer';
 import { MemoryLayoutVisualizer } from '@/components/visualizers/MemoryLayoutVisualizer';
@@ -66,11 +68,35 @@ fn main() {
     const progress = loadProgress();
     return progress.completedLessons.includes(currentSlug);
   });
+  const [copiedCode, setCopiedCode] = React.useState(false);
+  const copyTimerRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     const progress = loadProgress();
     setCompleted(progress.completedLessons.includes(currentSlug));
+    setCopiedCode(false);
   }, [currentSlug]);
+
+  React.useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard?.writeText(lesson.codeSnippet);
+      setCopiedCode(true);
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = window.setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      // Clipboard API may be unavailable in restricted contexts
+    }
+  };
 
   const toggleCompleted = () => {
     const progress = loadProgress();
@@ -238,14 +264,27 @@ fn main() {
               <span className="h-3 w-3 rounded-full bg-emerald-500/80" />
               <span className="ml-2 font-mono text-slate-400">rustc 1.84.0</span>
             </div>
-            <span className="text-emerald-400 font-mono text-[11px] flex items-center gap-1">
-              <CheckCircle className="h-3 w-3" />
-              {t('common.ready')}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-emerald-400 font-mono text-[11px] flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                {t('common.ready')}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                aria-label={copiedCode ? t('common.copied') : t('common.copy')}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-700/80 bg-slate-900 px-2 py-1 text-[11px] font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                {copiedCode ? (
+                  <Check className="h-3 w-3 text-emerald-400" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+                <span>{copiedCode ? t('common.copied') : t('common.copy')}</span>
+              </button>
+            </div>
           </div>
-          <pre className="p-4 sm:p-6 overflow-x-auto text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">
-            <code>{lesson.codeSnippet}</code>
-          </pre>
+          <RustCodeBlock code={lesson.codeSnippet} showLineNumbers />
         </div>
 
         {lesson.codeExplanation.length > 0 && (
@@ -285,9 +324,7 @@ fn main() {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
               {t('lesson.pitfallWrongLabel')}
             </span>
-            <pre className="rounded-xl border border-red-900/30 bg-slate-950 p-3.5 overflow-x-auto text-xs font-mono text-red-200 leading-relaxed">
-              <code>{lesson.pitfall.badCode}</code>
-            </pre>
+            <RustCodeBlock code={lesson.pitfall.badCode} variant="pitfall" showLineNumbers />
           </div>
 
           <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">

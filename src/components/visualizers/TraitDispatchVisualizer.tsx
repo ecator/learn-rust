@@ -3,6 +3,7 @@ import { VisualizerProps } from './types';
 import { AlertTriangle, ShieldCheck, Bug } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { Ferris, FerrisMood } from '@/components/mascot/Ferris';
+import { HighlightedRustCode } from '@/components/common/RustCodeBlock';
 
 export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className = '' }) => {
   const { language } = useI18n();
@@ -173,8 +174,10 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Specialized: draw_circle(&amp;Circle)
               </span>
-              <pre className="mt-2 font-mono text-xs text-slate-600 dark:text-slate-300">
-                call &lt;Circle as Draw&gt;::draw
+              <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 px-3 py-2 font-mono text-xs text-slate-200">
+                <code>
+                  <HighlightedRustCode code="call <Circle as Draw>::draw" />
+                </code>
               </pre>
             </div>
 
@@ -182,8 +185,10 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Specialized: draw_square(&amp;Square)
               </span>
-              <pre className="mt-2 font-mono text-xs text-slate-600 dark:text-slate-300">
-                call &lt;Square as Draw&gt;::draw
+              <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 px-3 py-2 font-mono text-xs text-slate-200">
+                <code>
+                  <HighlightedRustCode code="call <Square as Draw>::draw" />
+                </code>
               </pre>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { VisualizerProps } from './types';
 import { ArrowRight, AlertTriangle, Bug, ShieldCheck } from 'lucide-react';
 import { Ferris, FerrisMood } from '@/components/mascot/Ferris';
 import { useI18n } from '@/lib/i18n';
+import { HighlightedRustCode } from '@/components/common/RustCodeBlock';
 
 export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className = '' }) => {
   const { language } = useI18n();
@@ -332,7 +333,9 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 space-y-2 font-mono text-xs">
             <div>
               {language === 'zh' ? '组合子管道 Pipeline' : language === 'ja' ? 'パイプライン Pipeline' : 'Pipeline'}:{' '}
-              <code>opt.map(|x| x * 2).unwrap_or(0)</code>
+              <code className="rounded bg-slate-950 px-2 py-0.5 text-slate-200">
+                <HighlightedRustCode code="opt.map(|x| x * 2).unwrap_or(0)" />
+              </code>
             </div>
             <div className="rounded bg-slate-100 p-3 dark:bg-slate-800">
               Result:{' '}

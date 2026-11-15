@@ -3,6 +3,7 @@ import { VisualizerProps } from './types';
 import { Play, Pause, RotateCcw, ChevronLeft, ChevronRight, AlertTriangle, ShieldCheck, Bug } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { Ferris, FerrisMood } from '@/components/mascot/Ferris';
+import { HighlightedRustCode } from '@/components/common/RustCodeBlock';
 
 export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
   initialStep = 0,
@@ -219,19 +220,45 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
 
       {/* Code Display */}
       <div className={`${mobileTab === 'code' ? 'block' : 'hidden md:block'}`}>
-        <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs text-slate-200 space-y-1">
-          <div className={step === 0 ? 'bg-[#CE412B]/30 px-2 py-0.5 rounded text-white font-bold' : 'px-2 py-0.5'}>
-            1: let s1 = String::from("hello");
-          </div>
-          <div className={step === 1 ? 'bg-[#CE412B]/30 px-2 py-0.5 rounded text-white font-bold' : 'px-2 py-0.5'}>
-            {simulateError ? '2: let s2 = s1; // move occurs here' : '2: let s2 = s1.clone(); // deep heap clone'}
-          </div>
-          <div className={step === 2 ? (simulateError ? 'bg-red-500/30 px-2 py-0.5 rounded text-red-200 font-bold' : 'bg-emerald-500/30 px-2 py-0.5 rounded text-emerald-200 font-bold') : 'px-2 py-0.5'}>
-            {simulateError ? '3: println!("{}", s1); // error: use of moved value' : '3: println!("{}, {}", s1, s2); // both valid!'}
-          </div>
-          <div className={step === 3 ? 'bg-[#CE412B]/30 px-2 py-0.5 rounded text-white font-bold' : 'px-2 py-0.5'}>
-            4: &#125; // drop(s2) executes
-          </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-200 space-y-1 overflow-x-auto">
+          {[
+            {
+              line: 'let s1 = String::from("hello");',
+              activeClass: 'bg-[#CE412B]/25 border-l-2 border-[#CE412B]',
+            },
+            {
+              line: simulateError
+                ? 'let s2 = s1; // move occurs here'
+                : 'let s2 = s1.clone(); // deep heap clone',
+              activeClass: 'bg-[#CE412B]/25 border-l-2 border-[#CE412B]',
+            },
+            {
+              line: simulateError
+                ? 'println!("{}", s1); // error: use of moved value'
+                : 'println!("{}, {}", s1, s2); // both valid!',
+              activeClass: simulateError
+                ? 'bg-red-500/25 border-l-2 border-red-400'
+                : 'bg-emerald-500/25 border-l-2 border-emerald-400',
+            },
+            {
+              line: '} // drop(s2) executes',
+              activeClass: 'bg-[#CE412B]/25 border-l-2 border-[#CE412B]',
+            },
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className={`flex items-baseline whitespace-pre px-2 py-0.5 rounded ${
+                step === idx ? `${item.activeClass} font-semibold` : 'border-l-2 border-transparent'
+              }`}
+            >
+              <span aria-hidden="true" className="select-none text-slate-500 mr-2.5 w-4 text-right shrink-0">
+                {idx + 1}:
+              </span>
+              <code>
+                <HighlightedRustCode code={item.line} />
+              </code>
+            </div>
+          ))}
         </div>
 
         {/* Error alert simulation */}

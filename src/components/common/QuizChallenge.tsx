@@ -3,6 +3,7 @@ import { CheckCircle2, XCircle, RotateCcw, Award, Sparkles } from 'lucide-react'
 import { saveQuizResult } from '@/lib/storage';
 import { useI18n } from '@/lib/i18n';
 import { getLocalizedLesson } from '@/lib/i18n/curriculumData';
+import { HighlightedRustCode } from '@/components/common/RustCodeBlock';
 
 export interface QuizChallengeProps {
   lessonId?: string;
@@ -192,8 +193,12 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
           {resolvedChallengePrompt}
         </p>
 
-        <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-          <span>{resolvedChallengePrefix}</span>
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 font-mono text-xs text-slate-200">
+          {resolvedChallengePrefix && (
+            <span className="whitespace-pre-wrap">
+              <HighlightedRustCode code={resolvedChallengePrefix} />
+            </span>
+          )}
           <input
             type="text"
             aria-label="Missing Rust keyword"
@@ -203,15 +208,19 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
               if (challengeVerified !== null) setChallengeVerified(null);
             }}
             placeholder={t('quiz.keywordPlaceholder')}
-            className="w-28 rounded-lg border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 text-center font-bold focus:ring-2 focus:ring-[#CE412B] dark:bg-slate-800"
+            className="w-28 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-center font-bold text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#CE412B]"
           />
-          <span>{resolvedChallengeSuffix}</span>
+          {resolvedChallengeSuffix && (
+            <span className="whitespace-pre-wrap">
+              <HighlightedRustCode code={resolvedChallengeSuffix} />
+            </span>
+          )}
 
           <button
             type="button"
             onClick={verifyChallenge}
             aria-label="Verify"
-            className="rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 font-sans text-xs font-semibold hover:opacity-90"
+            className="ml-auto rounded-lg bg-[#CE412B] text-white px-3 py-1.5 font-sans text-xs font-semibold hover:bg-[#B33621] transition-colors"
           >
             {t('quiz.verify')}
           </button>
