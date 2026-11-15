@@ -47,7 +47,7 @@ describe('Challenger 2: Adversarial Layout & Responsive Resilience', () => {
       expect(['zh', 'en', 'ja']).toContain(localStorage.getItem('learn_rust_lang'));
     });
 
-    it('theme toggle handles rapid toggles and updates html class & localStorage', async () => {
+    it('theme switcher handles rapid cycling across light / dark / auto and updates html class & localStorage', async () => {
       const user = userEvent.setup();
       render(
         <MemoryRouter>
@@ -55,13 +55,24 @@ describe('Challenger 2: Adversarial Layout & Responsive Resilience', () => {
         </MemoryRouter>
       );
 
-      const themeBtn = screen.getByLabelText(/Switch to dark theme/i);
+      const lightBtn = screen.getByLabelText(/Switch to light theme/i);
+      const darkBtn = screen.getByLabelText(/Switch to dark theme/i);
+      const autoBtn = screen.getByLabelText(/Switch to auto theme/i);
+      const buttons = [lightBtn, darkBtn, autoBtn];
+
       for (let i = 0; i < 5; i++) {
-        await user.click(screen.getByLabelText(/Switch to (dark|light) theme/i));
+        await user.click(buttons[i % buttons.length]);
       }
-      // After 5 clicks from light, should be dark
+      // Index 4 % 3 === 1 => dark
       expect(document.documentElement.classList.contains('dark')).toBe(true);
       expect(localStorage.getItem('learn_rust_theme')).toBe('dark');
+      expect(darkBtn).toHaveAttribute('aria-pressed', 'true');
+      expect(lightBtn).toHaveAttribute('aria-pressed', 'false');
+      expect(autoBtn).toHaveAttribute('aria-pressed', 'false');
+
+      await user.click(autoBtn);
+      expect(localStorage.getItem('learn_rust_theme')).toBe('system');
+      expect(autoBtn).toHaveAttribute('aria-pressed', 'true');
     });
   });
 

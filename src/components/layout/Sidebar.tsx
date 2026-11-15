@@ -14,9 +14,19 @@ import {
   Boxes,
   X,
   Globe,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 import { loadProgress, STORAGE_KEY_PROGRESS } from '@/lib/storage';
 import { useI18n, SupportedLanguage } from '@/lib/i18n';
+import { useTheme, ThemeMode, THEME_OPTIONS } from '@/lib/theme';
+
+const sidebarThemeIcons: Record<ThemeMode, React.ComponentType<{ className?: string }>> = {
+  light: Sun,
+  dark: Moon,
+  system: Monitor,
+};
 import {
   curriculumLessons,
   CurriculumPhaseKey,
@@ -41,6 +51,7 @@ const iconMap: Record<LessonIconKey, React.ComponentType<{ className?: string }>
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { language, setLanguage, t } = useI18n();
+  const { theme, setTheme } = useTheme();
   const [progress, setProgress] = React.useState(() => loadProgress());
 
   React.useEffect(() => {
@@ -186,6 +197,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   )}
                 >
                   {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Drawer Mobile Theme Switcher */}
+        <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800 lg:hidden">
+          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <Monitor className="h-3.5 w-3.5 text-[#CE412B]" />
+            <span>{t('sidebar.themeSwitcher')}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5" data-testid="sidebar-theme-switcher">
+            {THEME_OPTIONS.map((opt) => {
+              const Icon = sidebarThemeIcons[opt.mode];
+              const active = theme === opt.mode;
+              const label = t(opt.labelKey);
+              return (
+                <button
+                  key={opt.mode}
+                  type="button"
+                  onClick={() => setTheme(opt.mode)}
+                  aria-pressed={active}
+                  aria-label={`${t('sidebar.themeSwitcher')}: ${label}`}
+                  data-testid={`sidebar-theme-${opt.mode}`}
+                  className={cn(
+                    'inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition-colors',
+                    active
+                      ? 'border-[#CE412B] bg-[#CE412B] text-white shadow-sm'
+                      : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span>{label}</span>
                 </button>
               );
             })}

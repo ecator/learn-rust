@@ -11,8 +11,13 @@ export const zh: TranslationDictionary = {
     closeSidebar: '关闭侧边栏',
     languageToggle: '切换语言 (ZH / EN / JA)',
     languageLabel: '界面语言',
+    themeLabel: '主题模式',
+    themeLight: '明亮',
+    themeDark: '暗色',
+    themeSystem: '自动',
     themeToggleLight: '切换至明亮主题',
     themeToggleDark: '切换至暗色主题',
+    themeToggleSystem: '跟随系统主题（自动）',
     githubRepo: 'GitHub 代码仓库',
   },
   common: {
@@ -163,6 +168,7 @@ export const zh: TranslationDictionary = {
     overview: '总览',
     yourProgress: '当前学习进度',
     languageSwitcher: '语言切换',
+    themeSwitcher: '主题切换',
   },
   footer: {
     description: '一个交互式、可视化、零妥协的 Rust 学习平台，带你从基础语法稳步迈向无畏并发。',

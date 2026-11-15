@@ -203,4 +203,49 @@ describe('Theming Engine (src/lib/theme.tsx)', () => {
     applyThemeClass('light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
+
+  it('synchronizes nested ThemeProviders and prevents stale outer matchMedia overrides', async () => {
+    const user = userEvent.setup();
+    const mm = createMatchMediaMock(false);
+    window.matchMedia = mm;
+
+    render(
+      <ThemeProvider>
+        <div data-testid="outer">
+          <ThemeConsumer />
+        </div>
+        <ThemeProvider>
+          <div data-testid="inner">
+            <ThemeConsumer />
+          </div>
+        </ThemeProvider>
+      </ThemeProvider>
+    );
+
+    const innerDarkBtn = screen.getAllByRole('button', { name: 'Set Dark' })[1];
+    await user.click(innerDarkBtn);
+
+    const themeSpans = screen.getAllByTestId('current-theme');
+    expect(themeSpans[0]).toHaveTextContent('dark');
+    expect(themeSpans[1]).toHaveTextContent('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+
+    // OS switches to light while explicit 'dark' is active -> must stay dark
+    act(() => {
+      const instance = mm.mock.results[0]?.value;
+      instance._setMatches(false);
+    });
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
+
+  it('configures Tailwind v4 class-based dark variant and color-scheme in src/index.css', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const css = fs.readFileSync(path.resolve(process.cwd(), 'src/index.css'), 'utf-8');
+
+    expect(css).toMatch(/@custom-variant\s+dark\s+\(&:where\(\.dark,\s*\.dark\s*\*\)\);/);
+    expect(css).toContain('color-scheme: light;');
+    expect(css).toContain('color-scheme: dark;');
+    expect(css).not.toContain('color-scheme: light dark;');
+  });
 });

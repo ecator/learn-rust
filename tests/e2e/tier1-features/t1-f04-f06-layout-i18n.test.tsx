@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderApp, initializeTheme } from '../helpers/render-app';
+import { renderApp } from '../helpers/render-app';
 import { setViewport, setSystemThemePreference } from '../helpers/viewport';
 import { createMatchMediaMock } from '../../setup';
 
@@ -111,11 +111,12 @@ describe('Tier 1: Layout, Theming & i18n (F04 - F06)', () => {
       renderApp({ route: '/learn-rust/' });
       expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-      const themeToggle = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      await user.click(themeToggle);
+      const darkBtn = screen.getByRole('button', { name: /Switch to dark theme/i });
+      await user.click(darkBtn);
 
       expect(document.documentElement.classList.contains('dark')).toBe(true);
       expect(localStorage.getItem('learn_rust_theme')).toBe('dark');
+      expect(darkBtn).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('TC-T1-F05-04: Manual Theme Switch to Light', async () => {
@@ -123,21 +124,29 @@ describe('Tier 1: Layout, Theming & i18n (F04 - F06)', () => {
       renderApp({ route: '/learn-rust/', theme: 'dark' });
       expect(document.documentElement.classList.contains('dark')).toBe(true);
 
-      const themeToggle = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      await user.click(themeToggle);
+      const lightBtn = screen.getByRole('button', { name: /Switch to light theme/i });
+      await user.click(lightBtn);
 
       expect(document.documentElement.classList.contains('dark')).toBe(false);
       expect(localStorage.getItem('learn_rust_theme')).toBe('light');
+      expect(lightBtn).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('TC-T1-F05-05: System Mode Dynamic Adaptation', () => {
-      localStorage.setItem('learn_rust_theme', 'system');
+    it('TC-T1-F05-05: System Mode Dynamic Adaptation & Switch Back to Auto', async () => {
       window.matchMedia = createMatchMediaMock(false);
-      initializeTheme();
+      renderApp({ route: '/learn-rust/', theme: 'dark' });
+      expect(document.documentElement.classList.contains('dark')).toBe(true);
+
+      const autoBtn = screen.getByRole('button', { name: /Switch to auto theme/i });
+      await user.click(autoBtn);
+
+      expect(localStorage.getItem('learn_rust_theme')).toBe('system');
+      expect(autoBtn).toHaveAttribute('aria-pressed', 'true');
       expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-      setSystemThemePreference(true);
-      initializeTheme();
+      act(() => {
+        setSystemThemePreference(true);
+      });
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
   });

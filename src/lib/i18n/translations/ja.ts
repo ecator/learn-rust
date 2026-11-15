@@ -11,8 +11,13 @@ export const ja: TranslationDictionary = {
     closeSidebar: 'ナビゲーションサイドバーを閉じる',
     languageToggle: '言語切替 (ZH / EN / JA)',
     languageLabel: '表示言語',
+    themeLabel: 'テーマ',
+    themeLight: 'ライト',
+    themeDark: 'ダーク',
+    themeSystem: '自動',
     themeToggleLight: 'ライトモードに切り替え',
     themeToggleDark: 'ダークモードに切り替え',
+    themeToggleSystem: 'システム設定に合わせる（自動）',
     githubRepo: 'GitHub リポジトリ',
   },
   common: {
@@ -163,6 +168,7 @@ export const ja: TranslationDictionary = {
     overview: '一覧',
     yourProgress: 'あなたの進捗',
     languageSwitcher: '言語切替',
+    themeSwitcher: 'テーマ切替',
   },
   footer: {
     description: 'Rust の基礎から高度な並行処理までを視覚的かつインタラクティブに習得できる学習プラットフォームです。',

@@ -154,15 +154,19 @@ describe('Tier 2: Foundation & Layout Boundaries (F01 - F06)', () => {
       renderApp({ route: '/learn-rust/', theme: 'light' });
       expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-      const themeBtn = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      await user.click(themeBtn);
+      const darkBtn = screen.getByRole('button', { name: /Switch to dark theme/i });
+      await user.click(darkBtn);
       expect(document.documentElement.classList.contains('dark')).toBe(true);
       expect(localStorage.getItem('learn_rust_theme')).toBe('dark');
 
-      const themeBtnAfter = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      await user.click(themeBtnAfter);
+      const lightBtn = screen.getByRole('button', { name: /Switch to light theme/i });
+      await user.click(lightBtn);
       expect(document.documentElement.classList.contains('dark')).toBe(false);
       expect(localStorage.getItem('learn_rust_theme')).toBe('light');
+
+      const autoBtn = screen.getByRole('button', { name: /Switch to auto theme/i });
+      await user.click(autoBtn);
+      expect(localStorage.getItem('learn_rust_theme')).toBe('system');
     });
 
     it('TC-T2-F03-03: Storage resilience when loading malformed JSON data', () => {
@@ -297,13 +301,15 @@ describe('Tier 2: Foundation & Layout Boundaries (F01 - F06)', () => {
   // 5. Theming Engine Boundaries (F05)
   // =========================================================================
   describe('Theming Engine Boundaries (F05)', () => {
-    it('TC-T2-F05-01: Rapid theme switching (10 rapid toggles in tight loop)', async () => {
+    it('TC-T2-F05-01: Rapid theme switching (10 rapid toggles across light/dark/auto in tight loop)', async () => {
       renderApp({ route: '/learn-rust/' });
-      const themeBtn = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      expect(themeBtn).toBeInTheDocument();
+      const lightBtn = screen.getByRole('button', { name: /Switch to light theme/i });
+      const darkBtn = screen.getByRole('button', { name: /Switch to dark theme/i });
+      const autoBtn = screen.getByRole('button', { name: /Switch to auto theme/i });
+      const buttons = [lightBtn, darkBtn, autoBtn];
 
       for (let i = 0; i < 10; i++) {
-        await user.click(themeBtn);
+        await user.click(buttons[i % buttons.length]);
       }
 
       const classList = Array.from(document.documentElement.classList);

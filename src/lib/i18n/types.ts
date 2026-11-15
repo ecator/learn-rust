@@ -11,8 +11,13 @@ export interface TranslationDictionary {
     closeSidebar: string;
     languageToggle: string;
     languageLabel: string;
+    themeLabel: string;
+    themeLight: string;
+    themeDark: string;
+    themeSystem: string;
     themeToggleLight: string;
     themeToggleDark: string;
+    themeToggleSystem: string;
     githubRepo: string;
   };
   common: {
@@ -163,6 +168,7 @@ export interface TranslationDictionary {
     overview: string;
     yourProgress: string;
     languageSwitcher: string;
+    themeSwitcher: string;
   };
   footer: {
     description: string;

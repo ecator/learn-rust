@@ -3,19 +3,26 @@ import { NavLink, Link } from 'react-router-dom';
 import { FerrisIcon } from '@/components/FerrisIcon';
 import { cn } from '@/lib/utils';
 import { GithubIcon } from '@/components/GithubIcon';
-import { useTheme } from '@/lib/theme';
+import { useTheme, ThemeMode, THEME_OPTIONS } from '@/lib/theme';
 import { useI18n, SupportedLanguage } from '@/lib/i18n';
 import {
   Menu,
   X,
   Sun,
   Moon,
+  Monitor,
   Globe,
   BookOpen,
   Layers,
   Award,
   Home,
 } from 'lucide-react';
+
+const themeIcons: Record<ThemeMode, React.ComponentType<{ className?: string }>> = {
+  light: Sun,
+  dark: Moon,
+  system: Monitor,
+};
 
 interface HeaderProps {
   isSidebarOpen?: boolean;
@@ -26,16 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
   isSidebarOpen = false,
   onToggleSidebar,
 }) => {
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
-
-  // Local state to support both inside ThemeProvider/I18nProvider and standalone renders
-  const [localTheme, setLocalTheme] = React.useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined' && document.documentElement.classList.contains('dark')) {
-      return 'dark';
-    }
-    return resolvedTheme;
-  });
 
   const [currentLang, setCurrentLang] = React.useState<SupportedLanguage>(() => {
     if (typeof window !== 'undefined') {
@@ -53,32 +52,8 @@ export const Header: React.FC<HeaderProps> = ({
   });
 
   React.useEffect(() => {
-    setLocalTheme(resolvedTheme);
-  }, [resolvedTheme]);
-
-  React.useEffect(() => {
     setCurrentLang(language);
   }, [language]);
-
-  const isDark = localTheme === 'dark';
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    const nextTheme: 'light' | 'dark' = nextDark ? 'dark' : 'light';
-    setLocalTheme(nextTheme);
-    setTheme(nextTheme);
-    if (nextDark) {
-      document.documentElement.classList.add('dark');
-      try {
-        localStorage.setItem('learn_rust_theme', 'dark');
-      } catch {}
-    } else {
-      document.documentElement.classList.remove('dark');
-      try {
-        localStorage.setItem('learn_rust_theme', 'light');
-      } catch {}
-    }
-  };
 
   const selectLanguage = (nextLang: SupportedLanguage) => {
     setCurrentLang(nextLang);
@@ -116,9 +91,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/90 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 transition-colors duration-200">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
         {/* Left: Mobile hamburger & Brand */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {onToggleSidebar && (
             <button
               type="button"
@@ -133,18 +108,18 @@ export const Header: React.FC<HeaderProps> = ({
 
           <Link
             to="/"
-            className="flex items-center gap-2.5 transition-transform hover:scale-105"
+            className="flex items-center gap-2 sm:gap-2.5 transition-transform hover:scale-105 min-w-0"
             aria-label="Learn Rust Home"
           >
             <FerrisIcon size={36} className="shrink-0 drop-shadow-sm" />
-            <div className="flex flex-col">
-              <span className="font-bold tracking-tight text-slate-900 dark:text-white text-lg leading-tight flex items-center gap-1.5">
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold tracking-tight text-slate-900 dark:text-white text-base sm:text-lg leading-tight flex items-center gap-1.5 whitespace-nowrap">
                 {t('common.appName')}
-                <span className="rounded-full bg-[#CE412B]/10 px-2 py-0.5 text-xs font-semibold text-[#CE412B] dark:bg-[#CE412B]/20">
+                <span className="hidden sm:inline-flex rounded-full bg-[#CE412B]/10 px-2 py-0.5 text-xs font-semibold text-[#CE412B] dark:bg-[#CE412B]/20">
                   {t('common.version')}
                 </span>
               </span>
-              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+              <span className="hidden sm:block text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
                 {t('common.tagline')}
               </span>
             </div>
@@ -180,13 +155,13 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Right: Actions (Language, Theme, GitHub) */}
-        <div className="flex items-center gap-2">
-          {/* Segmented Pill Language Switcher */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Segmented Pill Language Switcher (shown inline on md+; available in mobile drawer on smaller screens) */}
           <div
             role="group"
             aria-label={t('nav.languageLabel')}
             data-testid="language-switcher"
-            className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90"
+            className="hidden md:inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90"
           >
             <button
               type="button"
@@ -221,20 +196,40 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </div>
 
-          {/* Theme Toggle Slot */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-            title={isDark ? t('nav.themeToggleLight') : t('nav.themeToggleDark')}
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE412B]"
+          {/* Segmented Pill Theme Switcher (Light / Dark / Auto) */}
+          <div
+            role="group"
+            aria-label={t('nav.themeLabel')}
+            data-testid="theme-switcher"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90"
           >
-            {isDark ? (
-              <Sun className="h-5 w-5 text-amber-400" />
-            ) : (
-              <Moon className="h-5 w-5 text-slate-600" />
-            )}
-          </button>
+            {THEME_OPTIONS.map((option) => {
+              const Icon = themeIcons[option.mode];
+              const active = theme === option.mode;
+              const label = t(option.labelKey);
+              const toggleLabel = t(option.toggleKey);
+              return (
+                <button
+                  key={option.mode}
+                  type="button"
+                  onClick={() => setTheme(option.mode)}
+                  aria-pressed={active}
+                  aria-label={toggleLabel}
+                  data-testid={`theme-option-${option.mode}`}
+                  title={toggleLabel}
+                  className={cn(
+                    'inline-flex items-center justify-center gap-1 rounded-full p-1.5 md:px-2.5 md:py-1 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-[#CE412B]',
+                    active
+                      ? 'bg-[#CE412B] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/70 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700/70'
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden md:inline">{label}</span>
+                </button>
+              );
+            })}
+          </div>
 
           {/* GitHub Repo Link */}
           <a

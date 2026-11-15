@@ -361,9 +361,9 @@ describe('Tier 3: Pairwise Combinations & Cross-Feature Interactions', () => {
 
       expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-      // User toggles theme via header button
-      const themeBtn = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      await user.click(themeBtn);
+      // User switches theme to dark via header segmented switcher
+      const darkBtn = screen.getByRole('button', { name: /Switch to dark theme/i });
+      await user.click(darkBtn);
 
       // Theme changes to dark mode
       expect(document.documentElement.classList.contains('dark')).toBe(true);

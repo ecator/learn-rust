@@ -45,21 +45,43 @@ describe('AppLayout Component', () => {
     expect(screen.getByTestId('page-content')).toHaveTextContent('Home Content');
   });
 
-  it('toggles theme between light and dark when theme button is clicked', async () => {
+  it('toggles theme between light, dark, and auto (system) across header and sidebar', async () => {
     const user = userEvent.setup();
     renderLayout('/');
 
-    const themeBtn = screen.getByLabelText('Switch to dark theme');
-    expect(themeBtn).toBeInTheDocument();
+    const lightBtn = screen.getByLabelText('Switch to light theme');
+    const darkBtn = screen.getByLabelText('Switch to dark theme');
+    const autoBtn = screen.getByLabelText('Switch to auto theme');
+
+    expect(autoBtn).toHaveAttribute('aria-pressed', 'true');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-    await user.click(themeBtn);
-
+    await user.click(darkBtn);
     expect(document.documentElement.classList.contains('dark')).toBe(true);
-    expect(screen.getByLabelText('Switch to light theme')).toBeInTheDocument();
+    expect(darkBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('sidebar-theme-dark')).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem('learn_rust_theme')).toBe('dark');
 
-    await user.click(screen.getByLabelText('Switch to light theme'));
+    await user.click(lightBtn);
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(lightBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('sidebar-theme-light')).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem('learn_rust_theme')).toBe('light');
+
+    await user.click(screen.getByTestId('sidebar-theme-system'));
+    expect(autoBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem('learn_rust_theme')).toBe('system');
+  });
+
+  it('displays localized Light / Dark / Auto labels when switched to Chinese', async () => {
+    const user = userEvent.setup();
+    renderLayout('/');
+
+    await user.click(screen.getByTestId('lang-option-zh'));
+
+    expect(screen.getByTestId('theme-option-light')).toHaveTextContent('明亮');
+    expect(screen.getByTestId('theme-option-dark')).toHaveTextContent('暗色');
+    expect(screen.getByTestId('theme-option-system')).toHaveTextContent('自动');
   });
 
   it('opens and closes mobile sidebar drawer when menu button is clicked', async () => {

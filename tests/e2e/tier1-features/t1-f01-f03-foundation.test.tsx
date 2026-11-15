@@ -121,12 +121,13 @@ describe('Tier 1: Foundation (F01 - F03)', () => {
     it('TC-T1-F03-02: UserEvent User Interaction Dispatch', async () => {
       const user = userEvent.setup();
       renderApp({ route: '/learn-rust/' });
-      // Find theme toggle button and click
-      const themeBtn = screen.getByRole('button', { name: /Switch to (dark|light) theme/i });
-      expect(themeBtn).toBeInTheDocument();
-      await user.click(themeBtn);
-      // Verify click listener executed and updated theme attribute or storage
-      expect(localStorage.getItem('learn_rust_theme')).toMatch(/dark|light/);
+      // Find dark theme option button and click
+      const darkBtn = screen.getByRole('button', { name: /Switch to dark theme/i });
+      expect(darkBtn).toBeInTheDocument();
+      await user.click(darkBtn);
+      // Verify click listener executed and updated theme attribute and storage
+      expect(localStorage.getItem('learn_rust_theme')).toBe('dark');
+      expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
 
     it('TC-T1-F03-03: Asynchronous Render Timing & waitFor', async () => {

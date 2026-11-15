@@ -9,6 +9,29 @@ export interface ThemeContextValue {
 }
 
 export const THEME_STORAGE_KEY = 'learn_rust_theme';
+export const THEME_CHANGE_EVENT = 'learn_rust_theme_change';
+
+export const THEME_OPTIONS: ReadonlyArray<{
+  mode: ThemeMode;
+  labelKey: string;
+  toggleKey: string;
+}> = [
+  { mode: 'light', labelKey: 'nav.themeLight', toggleKey: 'nav.themeToggleLight' },
+  { mode: 'dark', labelKey: 'nav.themeDark', toggleKey: 'nav.themeToggleDark' },
+  { mode: 'system', labelKey: 'nav.themeSystem', toggleKey: 'nav.themeToggleSystem' },
+];
+
+interface ThemeChangeDetail {
+  theme: ThemeMode;
+  storageKey: string;
+}
+
+export function normalizeThemeMode(value: unknown, fallback: ThemeMode = 'system'): ThemeMode {
+  if (value === 'light' || value === 'dark' || value === 'system') {
+    return value;
+  }
+  return fallback;
+}
 
 /**
  * Checks system dark mode preference via matchMedia
@@ -25,15 +48,18 @@ export function getSystemTheme(): 'light' | 'dark' {
 /**
  * Reads stored theme preference from localStorage
  */
-export function getStoredTheme(): ThemeMode {
+export function getStoredTheme(storageKey: string = THEME_STORAGE_KEY): ThemeMode {
   if (typeof window === 'undefined') return 'system';
   try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
-      return stored as ThemeMode;
-    }
+    return normalizeThemeMode(localStorage.getItem(storageKey), 'system');
   } catch {}
   return 'system';
+}
+
+export function resolveThemeMode(theme: ThemeMode, systemTheme: 'light' | 'dark' = getSystemTheme()): 'light' | 'dark' {
+  if (theme === 'dark') return 'dark';
+  if (theme === 'light') return 'light';
+  return systemTheme;
 }
 
 /**
@@ -45,6 +71,22 @@ export function applyThemeClass(resolved: 'light' | 'dark') {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
+  }
+}
+
+function persistAndBroadcastTheme(theme: ThemeMode, storageKey: string) {
+  try {
+    localStorage.setItem(storageKey, theme);
+  } catch (e) {
+    console.warn('Failed to save theme to localStorage', e);
+  }
+  applyThemeClass(resolveThemeMode(theme));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent<ThemeChangeDetail>(THEME_CHANGE_EVENT, {
+        detail: { theme, storageKey },
+      })
+    );
   }
 }
 
@@ -100,11 +142,37 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     };
   }, []);
 
-  const resolvedTheme: 'light' | 'dark' = useMemo(() => {
-    if (theme === 'dark') return 'dark';
-    if (theme === 'light') return 'light';
-    return systemTheme;
-  }, [theme, systemTheme]);
+  // Synchronize across nested providers, standalone callers, and other browser tabs
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleThemeEvent = (e: Event) => {
+      const detail = (e as CustomEvent<ThemeChangeDetail>).detail;
+      if (detail && detail.storageKey === storageKey) {
+        const nextTheme = normalizeThemeMode(detail.theme, defaultTheme);
+        setThemeState((prev) => (prev === nextTheme ? prev : nextTheme));
+      }
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === storageKey || e.key === null) {
+        const nextTheme = normalizeThemeMode(e.newValue, defaultTheme);
+        setThemeState((prev) => (prev === nextTheme ? prev : nextTheme));
+      }
+    };
+
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeEvent);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeEvent);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [storageKey, defaultTheme]);
+
+  const resolvedTheme: 'light' | 'dark' = useMemo(
+    () => resolveThemeMode(theme, systemTheme),
+    [theme, systemTheme]
+  );
 
   // Sync class on documentElement
   useEffect(() => {
@@ -113,16 +181,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   const setTheme = useCallback(
     (newTheme: ThemeMode) => {
-      const safeTheme: ThemeMode =
-        newTheme === 'light' || newTheme === 'dark' || newTheme === 'system'
-          ? newTheme
-          : 'system';
+      const safeTheme = normalizeThemeMode(newTheme, 'system');
       setThemeState(safeTheme);
-      try {
-        localStorage.setItem(storageKey, safeTheme);
-      } catch (e) {
-        console.warn('Failed to save theme to localStorage', e);
-      }
+      persistAndBroadcastTheme(safeTheme, storageKey);
     },
     [storageKey]
   );
@@ -144,36 +205,53 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
  */
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
+  const [fallbackTheme, setFallbackTheme] = useState<ThemeMode>(() => getStoredTheme());
+
+  useEffect(() => {
+    if (context || typeof window === 'undefined') return;
+
+    const syncFromStorage = () => {
+      setFallbackTheme(getStoredTheme());
+    };
+
+    const handleThemeEvent = (e: Event) => {
+      const detail = (e as CustomEvent<ThemeChangeDetail>).detail;
+      if (!detail || detail.storageKey === THEME_STORAGE_KEY) {
+        setFallbackTheme(normalizeThemeMode(detail?.theme, getStoredTheme()));
+      }
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === THEME_STORAGE_KEY || e.key === null) {
+        syncFromStorage();
+      }
+    };
+
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeEvent);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeEvent);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [context]);
+
+  const fallbackSetTheme = useCallback((newTheme: ThemeMode) => {
+    const safeTheme = normalizeThemeMode(newTheme, 'system');
+    setFallbackTheme(safeTheme);
+    persistAndBroadcastTheme(safeTheme, THEME_STORAGE_KEY);
+  }, []);
+
   if (context) {
     return context;
   }
 
   // Graceful fallback when called outside a provider
-  let domIsDark = false;
-  if (typeof document !== 'undefined') {
-    domIsDark = document.documentElement.classList.contains('dark');
-  }
-
-  const storedTheme = getStoredTheme();
   const sysTheme = getSystemTheme();
-  let fallbackResolved: 'light' | 'dark' = domIsDark ? 'dark' : sysTheme;
-  if (storedTheme === 'dark') fallbackResolved = 'dark';
-  else if (storedTheme === 'light') fallbackResolved = 'light';
-  else if (storedTheme === 'system') fallbackResolved = sysTheme;
+  const fallbackResolved = resolveThemeMode(fallbackTheme, sysTheme);
 
   return {
-    theme: storedTheme,
+    theme: fallbackTheme,
     resolvedTheme: fallbackResolved,
-    setTheme: (newTheme: ThemeMode) => {
-      const safeTheme: ThemeMode =
-        newTheme === 'light' || newTheme === 'dark' || newTheme === 'system'
-          ? newTheme
-          : 'system';
-      try {
-        localStorage.setItem(THEME_STORAGE_KEY, safeTheme);
-      } catch {}
-      const targetResolved = safeTheme === 'system' ? getSystemTheme() : safeTheme;
-      applyThemeClass(targetResolved);
-    },
+    setTheme: fallbackSetTheme,
   };
 }

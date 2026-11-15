@@ -11,8 +11,13 @@ export const en: TranslationDictionary = {
     closeSidebar: 'Close navigation sidebar',
     languageToggle: 'Change language (ZH / EN / JA)',
     languageLabel: 'Language',
+    themeLabel: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'Auto',
     themeToggleLight: 'Switch to light theme',
     themeToggleDark: 'Switch to dark theme',
+    themeToggleSystem: 'Switch to auto theme',
     githubRepo: 'GitHub Repository',
   },
   common: {
@@ -163,6 +168,7 @@ export const en: TranslationDictionary = {
     overview: 'Overview',
     yourProgress: 'Your Rust Progress',
     languageSwitcher: 'Language',
+    themeSwitcher: 'Theme',
   },
   footer: {
     description: 'An interactive, visual, and zero-compromise learning platform designed to take you from Rust fundamentals to advanced fearless concurrency.',
