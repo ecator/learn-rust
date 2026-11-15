@@ -1,4 +1,5 @@
 import { TranslationDictionary } from '../types';
+import { APP_VERSION_LABEL } from '../../version';
 
 export const ja: TranslationDictionary = {
   nav: {
@@ -23,7 +24,7 @@ export const ja: TranslationDictionary = {
   common: {
     appName: 'Learn Rust',
     tagline: 'インタラクティブ・クラブ・ラボ',
-    version: 'v0.1',
+    version: APP_VERSION_LABEL,
     loading: '読み込み中...',
     back: '戻る',
     next: '次へ',

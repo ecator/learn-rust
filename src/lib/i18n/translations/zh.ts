@@ -1,4 +1,5 @@
 import { TranslationDictionary } from '../types';
+import { APP_VERSION_LABEL } from '../../version';
 
 export const zh: TranslationDictionary = {
   nav: {
@@ -23,7 +24,7 @@ export const zh: TranslationDictionary = {
   common: {
     appName: 'Learn Rust',
     tagline: '交互式 Rust 学习实验室',
-    version: 'v0.1',
+    version: APP_VERSION_LABEL,
     loading: '加载中...',
     back: '返回',
     next: '下一节',

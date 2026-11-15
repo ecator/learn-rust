@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import fs from 'node:fs';
+import path from 'node:path';
 import { AppLayout } from '@/components/layout/AppLayout';
 
 describe('AppLayout Component', () => {
@@ -30,8 +32,13 @@ describe('AppLayout Component', () => {
     renderLayout('/');
 
     // Brand and logo
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf-8')
+    ) as { version: string };
+    const expectedVersion = pkg.version.startsWith('v') ? pkg.version : `v${pkg.version}`;
     expect(screen.getByLabelText('Learn Rust Home')).toBeInTheDocument();
     expect(screen.getAllByText('Learn Rust').length).toBeGreaterThan(0);
+    expect(screen.getByText(expectedVersion)).toBeInTheDocument();
 
     // Desktop nav links in header
     const desktopNav = screen.getByLabelText('Desktop Navigation');

@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   I18nProvider,
   useI18n,
@@ -12,6 +14,7 @@ import {
   en,
   ja,
 } from '@/lib/i18n';
+import { APP_VERSION, APP_VERSION_LABEL } from '@/lib/version';
 import { curriculumLessons } from '@/lib/i18n/curriculumData';
 
 const I18nConsumer: React.FC = () => {
@@ -215,6 +218,19 @@ describe('Tri-lingual i18n Engine (src/lib/i18n/)', () => {
         expect(en.mascot[mood]).toBeTruthy();
         expect(ja.mascot[mood]).toBeTruthy();
       }
+    });
+
+    it('injects common.version from package.json at compile time', () => {
+      const pkg = JSON.parse(
+        fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf-8')
+      ) as { version: string };
+      const expectedLabel = pkg.version.startsWith('v') ? pkg.version : `v${pkg.version}`;
+
+      expect(APP_VERSION).toBe(pkg.version);
+      expect(APP_VERSION_LABEL).toBe(expectedLabel);
+      expect(zh.common.version).toBe(expectedLabel);
+      expect(en.common.version).toBe(expectedLabel);
+      expect(ja.common.version).toBe(expectedLabel);
     });
   });
 });

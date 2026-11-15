@@ -1,4 +1,5 @@
 import { TranslationDictionary } from '../types';
+import { APP_VERSION_LABEL } from '../../version';
 
 export const en: TranslationDictionary = {
   nav: {
@@ -23,7 +24,7 @@ export const en: TranslationDictionary = {
   common: {
     appName: 'Learn Rust',
     tagline: 'Interactive Crab Lab',
-    version: 'v0.1',
+    version: APP_VERSION_LABEL,
     loading: 'Loading...',
     back: 'Back',
     next: 'Next',
