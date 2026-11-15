@@ -7,6 +7,10 @@ import {
   Layers,
   CheckCircle,
   Code2,
+  BookOpen,
+  AlertTriangle,
+  Check,
+  Terminal,
 } from 'lucide-react';
 import { OwnershipVisualizer } from '@/components/visualizers/OwnershipVisualizer';
 import { BorrowCheckerVisualizer } from '@/components/visualizers/BorrowCheckerVisualizer';
@@ -16,123 +20,45 @@ import { ConcurrencyVisualizer } from '@/components/visualizers/ConcurrencyVisua
 import { ErrorHandlingVisualizer } from '@/components/visualizers/ErrorHandlingVisualizer';
 import { QuizChallenge } from '@/components/common/QuizChallenge';
 import { loadProgress, saveProgress } from '@/lib/storage';
-
-const lessonData: Record<
-  string,
-  {
-    title: string;
-    phase: string;
-    difficulty: string;
-    duration: string;
-    overview: string;
-    codeSnippet: string;
-    visualizerSlug?: string;
-    nextSlug?: string;
-    prevSlug?: string;
-  }
-> = {
-  'hello-ferris': {
-    title: 'Hello Ferris & Cargo Basics',
-    phase: 'Phase 1: Foundations',
-    difficulty: 'Beginner',
-    duration: '15 min',
-    overview:
-      'Cargo is the Rust build system and package manager. In this module, you learn how cargo manages dependencies, builds release binaries, and why Rust enforces explicit entry points.',
-    codeSnippet: `fn main() {
-    println!("Hello, Ferris! 🦀");
-    let name = "Rustacean";
-    println!("Welcome to memory-safe systems programming, {}!", name);
-}`,
-    visualizerSlug: 'memory-layout',
-    nextSlug: 'primitives-mutability',
-  },
-  'primitives-mutability': {
-    title: 'Primitive Types & Mutability',
-    phase: 'Phase 1: Foundations',
-    difficulty: 'Beginner',
-    duration: '20 min',
-    overview:
-      'In Rust, variables are immutable by default. To make a binding mutable, you must explicitly declare it with "let mut". Learn how scalar and compound types behave in memory.',
-    codeSnippet: `fn main() {
-    let mut count = 42; // mutable variable
-    println!("Initial count: {}", count);
-    count += 1;
-    println!("Incremented count: {}", count);
-}`,
-    visualizerSlug: 'memory-layout',
-    prevSlug: 'hello-ferris',
-    nextSlug: 'ownership-move',
-  },
-  'ownership-move': {
-    title: 'Ownership & Move Semantics',
-    phase: 'Phase 1: Foundations',
-    difficulty: 'Beginner',
-    duration: '30 min',
-    overview:
-      'Ownership is Rust’s core mechanism for memory safety without a garbage collector. Each value has an owner, only one owner exists at a time, and when the owner goes out of scope, the memory is freed automatically.',
-    codeSnippet: `fn main() {
-    let s1 = String::from("hello");
-    // Ownership moves from s1 to s2.
-    // s1 is invalidated here!
-    let s2 = s1;
-
-    // println!("{}", s1); // COMPILE ERROR: value borrowed here after move
-    println!("s2 has ownership: {}", s2);
-}`,
-    visualizerSlug: 'ownership',
-    prevSlug: 'primitives-mutability',
-    nextSlug: 'references-borrowing',
-  },
-  'references-borrowing': {
-    title: 'References & Borrowing',
-    phase: 'Phase 1: Foundations',
-    difficulty: 'Beginner',
-    duration: '25 min',
-    overview:
-      'Borrowing allows accessing data without taking ownership. You can have any number of immutable references (&T) OR exactly one mutable reference (&mut T) at any given time, preventing data races at compile time.',
-    codeSnippet: `fn main() {
-    let mut data = String::from("Ferris");
-    
-    // Immutable borrow
-    let len = calculate_length(&data);
-    println!("Length: {}", len);
-
-    // Mutable borrow
-    append_crab(&mut data);
-    println!("Modified: {}", data);
-}
-
-fn calculate_length(s: &String) -> usize {
-    s.len()
-}
-
-fn append_crab(s: &mut String) {
-    s.push_str(" 🦀");
-}`,
-    visualizerSlug: 'borrow-checker',
-    prevSlug: 'ownership-move',
-    nextSlug: 'lifetimes-scopes',
-  },
-};
+import { useI18n } from '@/lib/i18n';
+import { getLocalizedLesson } from '@/lib/i18n/curriculumData';
 
 export const LessonPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const currentSlug = slug || 'hello-ferris';
+  const { language, t } = useI18n();
 
-  const lesson = lessonData[currentSlug] || {
-    title: currentSlug
-      .split('-')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' '),
-    phase: 'Curriculum Module',
-    difficulty: 'Interactive',
-    duration: '20 min',
-    overview: `Detailed lesson content for "${currentSlug}". This module combines visual walkthroughs, interactive memory simulators, and practice challenges.`,
-    codeSnippet: `// Rust Playground for ${currentSlug}
+  const resolvedLesson = getLocalizedLesson(currentSlug, language);
+
+  const fallbackTitle = currentSlug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
+  const lesson = resolvedLesson ?? {
+    slug: currentSlug,
+    order: 0,
+    phaseKey: 'phase1' as const,
+    difficultyKey: 'beginner' as const,
+    iconKey: 'sparkles' as const,
+    title: fallbackTitle,
+    shortTitle: fallbackTitle,
+    phase: t('lesson.fallbackPhase'),
+    difficulty: t('lesson.fallbackDifficulty'),
+    duration: t('lesson.fallbackDuration'),
+    summary: '',
+    tags: [],
+    overview: t('lesson.fallbackOverview', { title: fallbackTitle, slug: currentSlug }),
+    sections: [],
+    codeSnippet: `// Rust Playground: ${currentSlug}
 fn main() {
     println!("Exploring ${currentSlug}...");
 }`,
+    codeExplanation: [],
+    pitfall: undefined,
+    quiz: undefined,
     visualizerSlug: 'ownership',
+    prevSlug: undefined,
     nextSlug: 'curriculum',
   };
 
@@ -140,6 +66,11 @@ fn main() {
     const progress = loadProgress();
     return progress.completedLessons.includes(currentSlug);
   });
+
+  React.useEffect(() => {
+    const progress = loadProgress();
+    setCompleted(progress.completedLessons.includes(currentSlug));
+  }, [currentSlug]);
 
   const toggleCompleted = () => {
     const progress = loadProgress();
@@ -159,10 +90,13 @@ fn main() {
       case 'ownership-move':
         return <OwnershipVisualizer />;
       case 'references-borrowing':
+      case 'lifetimes-scopes':
         return <BorrowCheckerVisualizer />;
       case 'slices-memory':
       case 'hello-ferris':
       case 'primitives-mutability':
+      case 'structs-enums':
+      case 'smart-pointers':
         return <MemoryLayoutVisualizer />;
       case 'traits-generics':
         return <TraitDispatchVisualizer />;
@@ -183,59 +117,28 @@ fn main() {
     }
   };
 
-  const getQuizData = (slug: string) => {
-    switch (slug) {
-      case 'references-borrowing':
-        return {
-          question:
-            'Can you create an exclusive mutable reference (&mut T) while immutable references (&T) are active in the same scope?',
-          options: [
-            'Yes, Rust allows unlimited concurrent mutable and immutable references simultaneously.',
-            'No, Rust enforces either any number of immutable references OR exactly one mutable reference at a time.',
-            'Yes, but only if the variable is marked static.',
-          ],
-          correctIndex: 1,
-          explanation:
-            'Rust’s borrow checker guarantees that data cannot be mutated through one reference while other references are reading it, preventing data races.',
-        };
-      case 'concurrency-mutex':
-        return {
-          question:
-            'What happens when a thread calls lock() on a Mutex that is currently held by another thread?',
-          options: [
-            'The thread blocks and sleeps until the holding thread drops its MutexGuard.',
-            'The calling thread panics immediately.',
-            'The mutex forcibly evicts the holding thread and grants access.',
-          ],
-          correctIndex: 0,
-          explanation:
-            'Mutex::lock() blocks the calling thread until the mutex is released when the previous owner drops its MutexGuard.',
-        };
-      default:
-        return undefined;
-    }
-  };
-
   return (
     <div className="space-y-8 px-4 py-8 sm:px-6 lg:px-8 max-w-5xl mx-auto">
       {/* Navigation back & actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           to="/curriculum"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#CE412B] dark:text-slate-400 dark:hover:text-[#CE412B] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Curriculum</span>
+          <span>{t('lesson.backToCurriculum')}</span>
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">Lesson ID: {currentSlug}</span>
+          <span className="text-xs text-slate-400">
+            {t('lesson.lessonIdLabel', { slug: currentSlug, id: currentSlug })}
+          </span>
           <button
             type="button"
             onClick={toggleCompleted}
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
           >
             <CheckCircle className={`h-4 w-4 ${completed ? 'text-emerald-500' : 'text-slate-400'}`} />
-            <span>{completed ? 'Completed' : 'Mark as Completed'}</span>
+            <span>{completed ? t('common.completed') : t('common.markAsCompleted')}</span>
           </button>
         </div>
       </div>
@@ -270,18 +173,59 @@ fn main() {
               className="inline-flex items-center gap-2 rounded-xl bg-orange-500/10 px-4 py-2 text-xs font-semibold text-[#CE412B] hover:bg-orange-500/20 dark:bg-[#CE412B]/20 dark:hover:bg-[#CE412B]/30 transition-colors"
             >
               <Layers className="h-4 w-4" />
-              <span>Open Related Visualizer</span>
+              <span>{t('lesson.openVisualizer')}</span>
             </Link>
           </div>
         )}
       </div>
+
+      {/* Deep-Dive Core Sections */}
+      {lesson.sections.length > 0 && (
+        <section className="space-y-4" data-testid="lesson-sections">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-[#CE412B]" />
+            <span>{t('lesson.deepDiveTitle')}</span>
+          </h2>
+          <div className="grid grid-cols-1 gap-4">
+            {lesson.sections.map((sec, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900/60 shadow-sm space-y-3"
+              >
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#CE412B]/10 text-xs font-bold text-[#CE412B] dark:bg-[#CE412B]/20">
+                    {idx + 1}
+                  </span>
+                  <span>{sec.title}</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {sec.content}
+                </p>
+                {sec.bullets.length > 0 && (
+                  <ul className="space-y-1.5 pt-1">
+                    {sec.bullets.map((bullet, bIdx) => (
+                      <li
+                        key={bIdx}
+                        className="flex items-start gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300"
+                      >
+                        <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Code Playground Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Code2 className="h-5 w-5 text-[#CE412B]" />
-            <span>Interactive Code Walkthrough</span>
+            <span>{t('lesson.codeWalkthroughTitle')}</span>
           </h2>
           <span className="text-xs text-slate-500 font-mono">main.rs</span>
         </div>
@@ -296,14 +240,66 @@ fn main() {
             </div>
             <span className="text-emerald-400 font-mono text-[11px] flex items-center gap-1">
               <CheckCircle className="h-3 w-3" />
-              Ready
+              {t('common.ready')}
             </span>
           </div>
           <pre className="p-4 sm:p-6 overflow-x-auto text-xs sm:text-sm font-mono text-slate-200 leading-relaxed">
             <code>{lesson.codeSnippet}</code>
           </pre>
         </div>
+
+        {lesson.codeExplanation.length > 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900/50 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              <Terminal className="h-3.5 w-3.5 text-[#CE412B]" />
+              <span>{t('lesson.codeStepsTitle')}</span>
+            </div>
+            <ol className="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+              {lesson.codeExplanation.map((step, sIdx) => (
+                <li key={sIdx} className="leading-relaxed">
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </div>
+
+      {/* Common Pitfall Card */}
+      {lesson.pitfall && (
+        <section
+          data-testid="lesson-pitfall"
+          className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 sm:p-6 dark:bg-amber-950/20 space-y-3"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>{t('lesson.pitfallsTitle')}: {lesson.pitfall.title}</span>
+            </h2>
+            <span className="rounded-md bg-red-500/10 border border-red-500/30 px-2 py-0.5 text-[11px] font-mono font-bold text-red-700 dark:text-red-300">
+              {lesson.pitfall.errorCode}
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
+              {t('lesson.pitfallWrongLabel')}
+            </span>
+            <pre className="rounded-xl border border-red-900/30 bg-slate-950 p-3.5 overflow-x-auto text-xs font-mono text-red-200 leading-relaxed">
+              <code>{lesson.pitfall.badCode}</code>
+            </pre>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            {lesson.pitfall.description}
+          </p>
+
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200">
+            <span className="font-bold">{t('lesson.pitfallFixLabel')}: </span>
+            <span>{lesson.pitfall.fix}</span>
+          </div>
+        </section>
+      )}
 
       {/* Interactive Concept Simulator */}
       {renderVisualizer() && (
@@ -311,7 +307,7 @@ fn main() {
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Layers className="h-5 w-5 text-[#CE412B]" />
-              <span>Interactive Concept Simulator</span>
+              <span>{t('lesson.simulatorTitle')}</span>
             </h2>
           </div>
           {renderVisualizer()}
@@ -320,7 +316,7 @@ fn main() {
 
       {/* Interactive Practice Quiz */}
       <div className="space-y-3">
-        <QuizChallenge lessonId={currentSlug} {...getQuizData(currentSlug)} />
+        <QuizChallenge lessonId={currentSlug} {...(lesson.quiz ?? {})} />
       </div>
 
       {/* Prev / Next controls */}
@@ -331,7 +327,7 @@ fn main() {
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Previous Lesson</span>
+            <span>{t('lesson.previousLesson')}</span>
           </Link>
         ) : (
           <div />
@@ -342,7 +338,7 @@ fn main() {
             to={lesson.nextSlug === 'curriculum' ? '/curriculum' : `/lesson/${lesson.nextSlug}`}
             className="inline-flex items-center gap-2 rounded-xl bg-[#CE412B] px-4 py-2 text-xs font-semibold text-white hover:bg-[#B33621]"
           >
-            <span>Next Lesson</span>
+            <span>{t('lesson.nextLesson')}</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         ) : (
@@ -350,7 +346,7 @@ fn main() {
             to="/curriculum"
             className="inline-flex items-center gap-2 rounded-xl bg-[#CE412B] px-4 py-2 text-xs font-semibold text-white hover:bg-[#B33621]"
           >
-            <span>View All Modules</span>
+            <span>{t('lesson.viewAllModules')}</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         )}

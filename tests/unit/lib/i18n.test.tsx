@@ -12,6 +12,7 @@ import {
   en,
   ja,
 } from '@/lib/i18n';
+import { curriculumLessons } from '@/lib/i18n/curriculumData';
 
 const I18nConsumer: React.FC = () => {
   const { language, setLanguage, t } = useI18n();
@@ -152,7 +153,22 @@ describe('Tri-lingual i18n Engine (src/lib/i18n/)', () => {
       expect(enKeys).toEqual(zhKeys);
       expect(jaKeys).toEqual(zhKeys);
 
-      const sections = ['nav', 'common', 'mascot', 'visualizers', 'progress', 'errors'] as const;
+      const sections = [
+        'nav',
+        'common',
+        'mascot',
+        'visualizers',
+        'progress',
+        'errors',
+        'home',
+        'curriculum',
+        'lesson',
+        'quiz',
+        'sidebar',
+        'footer',
+        'notFound',
+        'gallery',
+      ] as const;
       for (const section of sections) {
         const zhSectionKeys = Object.keys(zh[section]).sort();
         const enSectionKeys = Object.keys(en[section]).sort();
@@ -160,6 +176,35 @@ describe('Tri-lingual i18n Engine (src/lib/i18n/)', () => {
 
         expect(enSectionKeys).toEqual(zhSectionKeys);
         expect(jaSectionKeys).toEqual(zhSectionKeys);
+      }
+    });
+
+    it('verifies all 10 curriculum lessons have complete zh, en, and ja translations', () => {
+      expect(curriculumLessons).toHaveLength(10);
+
+      for (const lesson of curriculumLessons) {
+        for (const lang of ['zh', 'en', 'ja'] as const) {
+          const localized = lesson.translations[lang];
+          expect(localized.title.trim().length).toBeGreaterThan(0);
+          expect(localized.shortTitle.trim().length).toBeGreaterThan(0);
+          expect(localized.phase.trim().length).toBeGreaterThan(0);
+          expect(localized.difficulty.trim().length).toBeGreaterThan(0);
+          expect(localized.duration.trim().length).toBeGreaterThan(0);
+          expect(localized.summary.trim().length).toBeGreaterThan(0);
+          expect(localized.overview.trim().length).toBeGreaterThan(0);
+          expect(localized.tags.length).toBeGreaterThan(0);
+          expect(localized.sections.length).toBeGreaterThan(0);
+          expect(localized.codeSnippet.trim().length).toBeGreaterThan(0);
+          expect(localized.codeExplanation.length).toBeGreaterThan(0);
+          expect(localized.pitfall.title.trim().length).toBeGreaterThan(0);
+          expect(localized.pitfall.description.trim().length).toBeGreaterThan(0);
+          expect(localized.pitfall.fix.trim().length).toBeGreaterThan(0);
+          expect(localized.quiz.question.trim().length).toBeGreaterThan(0);
+          expect(localized.quiz.options.length).toBe(3);
+          expect(localized.quiz.explanation.trim().length).toBeGreaterThan(0);
+          expect(localized.quiz.challengePrompt.trim().length).toBeGreaterThan(0);
+          expect(localized.quiz.challengeSuccess.trim().length).toBeGreaterThan(0);
+        }
       }
     });
 

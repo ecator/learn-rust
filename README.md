@@ -31,8 +31,8 @@ fn main() {
 ## 🚀 Key Features
 
 1. **Zero-to-Mastery Progressive Curriculum**
-   - 10+ comprehensive modules spanning Cargo, primitive types, ownership & borrowing, memory layouts, enums, trait dispatch, fearless concurrency, and error handling.
-   - Code snippets, syntax tokens, and common pitfalls explained with compiler error reproductions and fixes.
+   - 10 progressive interactive modules spanning Cargo, primitive types, ownership & borrowing, memory layouts, enums, trait dispatch, fearless concurrency, and error handling.
+   - Fully translated lesson overviews, deep-dive sections, commented Rust code snippets, pitfall analyses, and interactive quizzes/code challenges in Chinese, English, and Japanese.
 
 2. **6 Interactive Concept Visualizers**
    - **Ownership & Move**: Watch stack pointers transfer, heap chunk lifecycles, and move invalidation.
@@ -43,8 +43,8 @@ fn main() {
    - **Railway Error Flow**: Step through the `?` operator bifurcating happy and error tracks.
 
 3. **Tri-lingual Localization (i18n)**
-   - Native support for Chinese (简体中文), English, and Japanese (日本語).
-   - Automatic browser language detection (`navigator.language`) with Chinese fallback.
+   - End-to-end native support for Chinese (简体中文), English, and Japanese (日本語) across both application UI (navigation, sidebar, breadcrumbs, progress dashboard, mascot moods, and all 6 interactive visualizers) and full curriculum content (all 10 modules, quizzes, and challenges).
+   - Automatic browser language detection (`navigator.language`) with Chinese (`zh`) fallback, persistent preference storage under `learn_rust_lang`, and instant header/drawer language switching.
 
 4. **Dual Theming Engine**
    - Light and dark modes with seamless system preference (`prefers-color-scheme`) tracking and manual override.

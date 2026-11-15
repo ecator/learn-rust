@@ -80,7 +80,7 @@ export const BorrowCheckerVisualizer: React.FC<VisualizerProps> = ({
     },
     {
       zh: '非词法作用域生命周期（NLL）：r1/r2 在最后一次使用后提前失效，独占可变租约 m 顺利授予并安全打印。',
-      en: 'Non-Lexical Lifetimes (NLL): r1 and r2 expired after their last use; mutable lease granted cleanly.',
+      en: 'NLL early release: r1 and r2 end right after their last read, granting exclusive mutable lease m without conflict.',
       ja: '非語彙的ライフタイム (NLL)：最後の使用をもって r1/r2 が終了し、可変借用 m が安全に付与されます。',
     },
   ];
@@ -270,7 +270,13 @@ export const BorrowCheckerVisualizer: React.FC<VisualizerProps> = ({
             className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2"
           >
             <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
-            <span>Non-Lexical Lifetimes (NLL): r1 and r2 expired after their last use; mutable lease granted cleanly.</span>
+            <span>
+              {language === 'zh'
+                ? '非词法生命周期 Non-Lexical Lifetimes (NLL)：r1 与 r2 在最后一次使用后即失效，可变借用 m 安全授权。'
+                : language === 'ja'
+                ? '非レキシカルライフタイム Non-Lexical Lifetimes (NLL): r1 と r2 は最終使用後に終了し、可変借用 m が安全に許可されました。'
+                : 'Non-Lexical Lifetimes (NLL): r1 and r2 expired after their last use; mutable lease granted cleanly.'}
+            </span>
           </div>
         )}
       </div>
@@ -280,7 +286,11 @@ export const BorrowCheckerVisualizer: React.FC<VisualizerProps> = ({
         <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Active Reference Leases Timeline
+              {language === 'zh'
+                ? '活跃引用租期时间线 (Active Reference Leases Timeline)'
+                : language === 'ja'
+                ? '有効参照リースタイムライン (Active Reference Leases Timeline)'
+                : 'Active Reference Leases Timeline'}
             </span>
             <span className="text-[10px] font-mono text-slate-400">
               {language === 'zh' ? '只读共享 vs 独占可变' : language === 'ja' ? '共有 vs 排他' : 'Shared vs Exclusive'}
@@ -302,7 +312,23 @@ export const BorrowCheckerVisualizer: React.FC<VisualizerProps> = ({
                 )}
               </div>
               <span className="text-[11px] font-mono text-slate-500">
-                {step === 1 ? 'Active Lease (&T)' : step === 2 && simulateError ? 'In Conflict' : 'Inactive'}
+                {step === 1
+                  ? language === 'zh'
+                    ? '活跃租期 Active Lease (&T)'
+                    : language === 'ja'
+                    ? '有効リース Active Lease (&T)'
+                    : 'Active Lease (&T)'
+                  : step === 2 && simulateError
+                  ? language === 'zh'
+                    ? '借用冲突 (In Conflict)'
+                    : language === 'ja'
+                    ? '競合中 (In Conflict)'
+                    : 'In Conflict'
+                  : language === 'zh'
+                  ? '未激活 (Inactive)'
+                  : language === 'ja'
+                  ? '非アクティブ (Inactive)'
+                  : 'Inactive'}
               </span>
             </div>
 
@@ -320,7 +346,23 @@ export const BorrowCheckerVisualizer: React.FC<VisualizerProps> = ({
                 )}
               </div>
               <span className="text-[11px] font-mono text-slate-500">
-                {step === 1 ? 'Active Lease (&T)' : step === 2 && simulateError ? 'In Conflict' : 'Inactive'}
+                {step === 1
+                  ? language === 'zh'
+                    ? '活跃租期 Active Lease (&T)'
+                    : language === 'ja'
+                    ? '有効リース Active Lease (&T)'
+                    : 'Active Lease (&T)'
+                  : step === 2 && simulateError
+                  ? language === 'zh'
+                    ? '借用冲突 (In Conflict)'
+                    : language === 'ja'
+                    ? '競合中 (In Conflict)'
+                    : 'In Conflict'
+                  : language === 'zh'
+                  ? '未激活 (Inactive)'
+                  : language === 'ja'
+                  ? '非アクティブ (Inactive)'
+                  : 'Inactive'}
               </span>
             </div>
 
@@ -335,7 +377,23 @@ export const BorrowCheckerVisualizer: React.FC<VisualizerProps> = ({
                 ) : null}
               </div>
               <span className="text-[11px] font-mono text-slate-500">
-                {step === 2 && simulateError ? 'Blocked' : step === 3 || (step === 2 && !simulateError) ? 'Active Lease (&mut T)' : 'Unallocated'}
+                {step === 2 && simulateError
+                  ? language === 'zh'
+                    ? '已阻塞 (Blocked)'
+                    : language === 'ja'
+                    ? 'ブロック済み (Blocked)'
+                    : 'Blocked'
+                  : step === 3 || (step === 2 && !simulateError)
+                  ? language === 'zh'
+                    ? '活跃租期 Active Lease (&mut T)'
+                    : language === 'ja'
+                    ? '有効リース Active Lease (&mut T)'
+                    : 'Active Lease (&mut T)'
+                  : language === 'zh'
+                  ? '未分配 (Unallocated)'
+                  : language === 'ja'
+                  ? '未割り当て (Unallocated)'
+                  : 'Unallocated'}
               </span>
             </div>
           </div>

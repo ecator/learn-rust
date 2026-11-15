@@ -14,8 +14,10 @@ import {
   STORAGE_KEY_PROGRESS,
   UserProgress,
 } from '@/lib/storage';
+import { useI18n } from '@/lib/i18n';
 
 export const ProgressPage: React.FC = () => {
+  const { t } = useI18n();
   const [progress, setProgress] = useState<UserProgress>(() => loadProgress());
   const [message, setMessage] = useState<string | null>(null);
 
@@ -35,10 +37,10 @@ export const ProgressPage: React.FC = () => {
   const percent = Math.min(100, Math.round((completedCount / 10) * 100));
 
   const resetProgress = () => {
-    if (window.confirm('Are you sure you want to reset your learning progress?')) {
+    if (window.confirm(t('progress.resetConfirm'))) {
       const defaultState = storageResetProgress();
       setProgress(defaultState);
-      setMessage('Progress successfully reset to baseline.');
+      setMessage(t('progress.resetSuccess'));
       setTimeout(() => setMessage(null), 3000);
     }
   };
@@ -46,37 +48,37 @@ export const ProgressPage: React.FC = () => {
   const exportProgress = () => {
     const raw = localStorage.getItem(STORAGE_KEY_PROGRESS) || JSON.stringify(progress, null, 2);
     navigator.clipboard?.writeText(raw);
-    setMessage('Progress JSON exported to clipboard successfully.');
+    setMessage(t('progress.exportSuccess'));
   };
 
   const statCards = [
     {
-      label: 'Experience Points (XP)',
+      label: t('progress.xp'),
       value: `${xp} XP`,
       icon: Sparkles,
       color: 'text-amber-500 bg-amber-500/10 dark:bg-amber-500/20',
-      subtitle: 'Earn XP by completing quizzes',
+      subtitle: t('progress.xpSubtitle'),
     },
     {
-      label: 'Modules Completed',
+      label: t('progress.modulesCompleted'),
       value: `${completedCount} / 10`,
       icon: CheckCircle2,
       color: 'text-[#CE412B] bg-[#CE412B]/10 dark:bg-[#CE412B]/20',
-      subtitle: `${percent}% overall curriculum progress`,
+      subtitle: t('progress.modulesSubtitle', { percent }),
     },
     {
-      label: 'Learning Streak',
-      value: `${streakDays} Day`,
+      label: t('progress.streak'),
+      value: t('progress.streakValue', { days: streakDays }),
       icon: Flame,
       color: 'text-orange-500 bg-orange-500/10 dark:bg-orange-500/20',
-      subtitle: 'Study daily to maintain momentum',
+      subtitle: t('progress.streakSubtitle'),
     },
     {
-      label: 'Interactive Accuracy',
+      label: t('progress.accuracy'),
       value: '100%',
       icon: TrendingUp,
       color: 'text-emerald-500 bg-emerald-500/10 dark:bg-emerald-500/20',
-      subtitle: 'Based on simulator quizzes',
+      subtitle: t('progress.accuracySubtitle'),
     },
   ];
 
@@ -86,14 +88,13 @@ export const ProgressPage: React.FC = () => {
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full bg-[#CE412B]/10 px-3 py-1 text-xs font-semibold text-[#CE412B] dark:bg-[#CE412B]/20">
           <Award className="h-3.5 w-3.5" />
-          <span>Learner Profile</span>
+          <span>{t('progress.badge')}</span>
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-          Your Learning Trajectory
+          {t('progress.title')}
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-          All progress data is stored locally in your browser’s localStorage. No login or tracking
-          cookies required.
+          {t('progress.subtitle')}
         </p>
       </div>
 
@@ -136,14 +137,13 @@ export const ProgressPage: React.FC = () => {
         <FerrisIcon size={96} className="shrink-0 drop-shadow-md" />
         <div className="space-y-2 text-center sm:text-left flex-1">
           <span className="rounded-full bg-[#CE412B] px-2.5 py-0.5 text-xs font-bold text-white">
-            Level 1: Novice Crab
+            {t('progress.levelBadge')}
           </span>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-            Ready to tackle your first ownership move?
+            {t('progress.levelTitle')}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl">
-            You are just getting started on your Rust journey. Complete lessons in the curriculum to
-            unlock new Ferris outfits and level up your Rustacean rank.
+            {t('progress.levelDesc')}
           </p>
         </div>
       </div>
@@ -151,11 +151,10 @@ export const ProgressPage: React.FC = () => {
       {/* Data Management Section */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/60 space-y-4">
         <h3 className="text-base font-bold text-slate-900 dark:text-white">
-          Data Management & Privacy
+          {t('progress.dataTitle')}
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          This application operates completely offline and client-side. If you wish to start from
-          scratch, you can wipe your local records at any time.
+          {t('progress.dataDesc')}
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -163,7 +162,7 @@ export const ProgressPage: React.FC = () => {
             onClick={exportProgress}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
           >
-            <span>Export Progress</span>
+            <span>{t('progress.exportTitle')}</span>
           </button>
           <button
             type="button"
@@ -171,7 +170,7 @@ export const ProgressPage: React.FC = () => {
             className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300 dark:hover:bg-red-900/40 transition-colors"
           >
             <RotateCcw className="h-4 w-4" />
-            <span>Reset Local Progress</span>
+            <span>{t('progress.resetTitle')}</span>
           </button>
         </div>
       </div>

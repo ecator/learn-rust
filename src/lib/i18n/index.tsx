@@ -8,6 +8,7 @@ export * from './types';
 export { zh, en, ja };
 
 export const LANG_STORAGE_KEY = 'learn_rust_lang';
+export const LANG_CHANGE_EVENT = 'learn_rust_lang_change';
 
 export const dictionaries: Record<SupportedLanguage, TranslationDictionary> = {
   zh,
@@ -108,6 +109,34 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
     }
   }, [language]);
 
+  // Listen to custom language change events and cross-tab storage events
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleLangEvent = (e: Event) => {
+      const detail = (e as CustomEvent<SupportedLanguage>).detail;
+      if (detail === 'zh' || detail === 'en' || detail === 'ja') {
+        setLanguageState((prev) => (prev === detail ? prev : detail));
+      }
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === LANG_STORAGE_KEY) {
+        const val = e.newValue;
+        if (val === 'zh' || val === 'en' || val === 'ja') {
+          setLanguageState((prev) => (prev === val ? prev : val));
+        }
+      }
+    };
+
+    window.addEventListener(LANG_CHANGE_EVENT, handleLangEvent);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(LANG_CHANGE_EVENT, handleLangEvent);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
   const setLanguage = useCallback((newLang: SupportedLanguage) => {
     setLanguageState(newLang);
     if (typeof document !== 'undefined') {
@@ -117,6 +146,9 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({
       localStorage.setItem(LANG_STORAGE_KEY, newLang);
     } catch (e) {
       console.warn('Failed to persist language to localStorage', e);
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(LANG_CHANGE_EVENT, { detail: newLang }));
     }
   }, []);
 
@@ -149,17 +181,7 @@ export function useI18n(): I18nContextValue {
   }
 
   // Fallback for standalone/isolated tests without provider
-  let currentLang: SupportedLanguage = 'zh';
-  if (
-    typeof document !== 'undefined' &&
-    (document.documentElement.lang === 'zh' ||
-      document.documentElement.lang === 'en' ||
-      document.documentElement.lang === 'ja')
-  ) {
-    currentLang = document.documentElement.lang as SupportedLanguage;
-  } else {
-    currentLang = detectBrowserLanguage();
-  }
+  const currentLang: SupportedLanguage = detectBrowserLanguage();
 
   return {
     language: currentLang,
@@ -170,6 +192,9 @@ export function useI18n(): I18nContextValue {
       try {
         localStorage.setItem(LANG_STORAGE_KEY, lang);
       } catch {}
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(LANG_CHANGE_EVENT, { detail: lang }));
+      }
     },
     t: (key: string, params?: Record<string, string | number>) => {
       return formatTranslation(currentLang, key, params);

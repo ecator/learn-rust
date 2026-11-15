@@ -13,7 +13,7 @@ This guide documents the architecture, directory conventions, development workfl
   - Routing via `createBrowserRouter` / `createMemoryRouter` (for tests) with `basename: '/learn-rust'`.
   - Local state and progress persistence managed via `localStorage` with key `learn_rust_progress_v1`.
   - Theming stored under `learn_rust_theme` (`light` | `dark` | `system`).
-  - Language preference stored under `learn_rust_lang` (`zh` | `en` | `ja`).
+  - Language preference stored under `learn_rust_lang` (`zh` | `en` | `ja`) via `I18nProvider` (synchronized across components with custom event `learn_rust_lang_change` and `storage` listener), driving both UI strings (`src/lib/i18n/translations/`) and localized curriculum/quiz data (`src/lib/i18n/curriculumData.ts`).
 
 ---
 
@@ -26,7 +26,7 @@ This guide documents the architecture, directory conventions, development workfl
 | F03 | Vitest Test Infrastructure | Vitest + Happy-DOM + Testing Library unit/integration test suite |
 | F04 | Navigation & Responsive Layout | Desktop nav, mobile hamburger drawer, sidebar curriculum navigation |
 | F05 | Theming Engine | Light, Dark, System theme mode with prefers-color-scheme listener |
-| F06 | Tri-lingual i18n System | Chinese (zh), English (en), Japanese (ja) with automatic locale detection |
+| F06 | Tri-lingual i18n System | Chinese (zh), English (en), Japanese (ja) across UI, visualizers, quizzes & curriculum with auto locale detection |
 | F07 | LocalStorage Progress Engine | Schema learn_rust_progress_v1 persistence, export/import/reset |
 | F08 | Ferris Mascot SVG Component | Vector Ferris mascot supporting 7 distinct emotional moods |
 | F09 | Ownership & Move Visualizer | Interactive stack & heap memory diagram illustrating move semantics |
@@ -35,8 +35,8 @@ This guide documents the architecture, directory conventions, development workfl
 | F12 | Trait Dispatch Visualizer | Monomorphization code expansion vs dynamic VTable jump tracing |
 | F13 | Concurrency & Mutex Visualizer | MPSC channel queueing and Arc<Mutex<T>> contention handoff |
 | F14 | Error Handling Visualizer | Railway track Result/Option chaining with ? operator short-circuiting |
-| F15 | Curriculum: 10 Progressive Modules | Progressive modules covering beginner to advanced Rust concepts |
-| F16 | Interactive Quizzes & Challenges | Knowledge check quizzes with instant evaluation and progress scoring |
+| F15 | Curriculum: 10 Progressive Modules | Progressive tri-lingual (zh, en, ja) modules covering beginner to advanced Rust concepts |
+| F16 | Interactive Quizzes & Challenges | Localized knowledge check quizzes and code challenges with instant evaluation and progress scoring |
 | F17 | GitHub Actions CI/CD Workflow | Automated test and build deployment workflow to GitHub Pages |
 | F18 | Documentation (README & AGENTS) | Maintainer documentation, architecture guidelines, and troubleshooting |
 
@@ -54,19 +54,32 @@ learn-rust/
 │   └── 404.html                    # GitHub Pages SPA redirect trick
 ├── src/
 │   ├── components/
-│   │   ├── layout/                 # Header, Sidebar, Breadcrumbs, Footer, MobileNav
+│   │   ├── common/
+│   │   │   └── QuizChallenge.tsx   # Localized quiz & code completion challenge
+│   │   ├── layout/                 # Header, Sidebar, Breadcrumbs, Footer, MobileNav, AppLayout
 │   │   ├── mascot/                 # Ferris vector mascot with 7 moods
-│   │   └── visualizers/            # 6 interactive Rust concept state machines
-│   ├── routes/                     # React Router page views
+│   │   └── visualizers/            # 6 interactive Rust concept state machines + types.ts
+│   ├── lib/
+│   │   ├── i18n/
+│   │   │   ├── index.tsx           # I18nProvider, useI18n, detectBrowserLanguage
+│   │   │   ├── types.ts            # SupportedLanguage, TranslationDictionary
+│   │   │   ├── translations/       # UI & visualizer label dictionaries (zh.ts, en.ts, ja.ts)
+│   │   │   ├── curriculumTypes.ts  # CurriculumLesson, LocalizedLessonContent, LessonQuiz
+│   │   │   ├── curriculumData.ts   # curriculumLessons catalog & getLocalizedLesson()
+│   │   │   ├── curriculumPart1.ts  # Modules 1-5 tri-lingual curriculum content
+│   │   │   └── curriculumPart2.ts  # Modules 6-10 tri-lingual curriculum content
+│   │   ├── storage.ts              # LocalStorage progress persistence engine
+│   │   ├── theme.tsx               # ThemeProvider & dark/light/system handling
+│   │   └── utils.ts                # Tailwind cn utility
+│   ├── routes/                     # React Router page views & route table
 │   │   ├── Home.tsx
 │   │   ├── Curriculum.tsx
 │   │   ├── LessonPage.tsx
 │   │   ├── VisualizersGallery.tsx
 │   │   ├── ProgressPage.tsx
-│   │   └── NotFound.tsx
-│   ├── lib/
-│   │   ├── storage.ts              # LocalStorage progress persistence engine
-│   │   └── utils.ts                # Tailwind cn utility
+│   │   ├── NotFound.tsx
+│   │   ├── routesConfig.tsx
+│   │   └── index.tsx
 │   ├── App.tsx                     # Top-level RouterProvider
 │   └── main.tsx                    # React 19 createRoot entry point
 ├── tests/
@@ -74,8 +87,11 @@ learn-rust/
 │   ├── unit/                       # Unit & component tests mirroring src/
 │   ├── adversarial/                # Adversarial layout & theming resilience tests
 │   └── e2e/                        # Vitest + Testing Library E2E test suites
-│       ├── helpers/                # render-app, storage-mock, viewport, visualizer-driver
-│       └── tier1-features/         # T1 Feature Coverage suites
+│       ├── helpers/                # accessibility, render-app, storage-mock, viewport, visualizer-driver
+│       ├── tier1-features/         # T1 Feature Coverage suites
+│       ├── tier2-boundaries/       # T2 Boundary & documentation suites
+│       ├── tier3-pairwise/         # T3 Orthogonal pairwise matrix suites
+│       └── tier4-journeys/         # T4 End-to-end user journey suites
 ├── vite.config.ts                  # Base path and Tailwind plugins
 └── vitest.config.ts                # Happy-DOM test configuration
 ```
@@ -85,15 +101,16 @@ learn-rust/
 ## 3. How to Add New Modules & Visualizers
 
 ### 3.1 Adding a New Curriculum Module
-1. Define metadata in `src/routes/Curriculum.tsx` under the `lessons` array.
-2. Add full lesson content, overview, and code examples in `src/routes/LessonPage.tsx`.
-3. Provide tri-lingual translations for title, description, and key concepts (`zh`, `en`, `ja`).
+1. Define the module metadata (`slug`, `order`, `phaseKey`, `iconKey`, optional `visualizerId`) in `src/lib/i18n/curriculumPart1.ts` or `src/lib/i18n/curriculumPart2.ts` using types from `src/lib/i18n/curriculumTypes.ts`. `src/lib/i18n/curriculumData.ts` automatically aggregates and sorts all lessons by `order` for `Curriculum.tsx`, `Sidebar.tsx`, `Breadcrumbs.tsx`, `LessonPage.tsx`, and `QuizChallenge.tsx`.
+2. Populate complete tri-lingual `translations` (`zh`, `en`, `ja`) adhering to `LocalizedLessonContent` (`title`, `shortTitle`, `phase`, `difficulty`, `duration`, `summary`, `tags`, `overview`, `sections`, `codeSnippet`, `codeExplanation`, `pitfall`, and `quiz`).
+3. If the module embeds a new interactive visualizer, wire its `visualizerId` in `src/routes/LessonPage.tsx`.
+4. Add unit coverage checks in `tests/unit/lib/i18n.test.tsx` (update expected lesson count if the catalog size changes).
 
 ### 3.2 Adding a New Visualizer
-1. Implement component under `src/components/visualizers/` implementing `VisualizerProps` from `types.ts`.
+1. Implement component under `src/components/visualizers/` implementing `VisualizerProps` from `types.ts`, using `useI18n()` / tri-lingual copy (`zh`, `en`, `ja`) for headings, tooltips, and step explanations.
 2. Include controls: Previous Step, Next Step, Reset, and optional Play/Pause.
 3. Use accessible roles, standard button text or `aria-label`, and `data-testid` where appropriate.
-4. Register the card in `src/routes/VisualizersGallery.tsx`.
+4. Register the localized card metadata in `src/routes/VisualizersGallery.tsx`, `src/components/layout/Sidebar.tsx`, and translation keys in `src/lib/i18n/translations/{zh,en,ja}.ts`.
 
 ---
 
@@ -117,3 +134,4 @@ The app is hosted at `/learn-rust/`. All route links must use relative React Rou
 - For media queries, use `createMatchMediaMock()` in `tests/setup.ts`.
 - When asserting clipboard writes, mock `navigator.clipboard` using `Object.defineProperty`.
 - Always reset `localStorage` and `document.documentElement` before each test.
+- Outside `I18nProvider`, `useI18n()` falls back to `detectBrowserLanguage()` (which reads `localStorage['learn_rust_lang']` then `navigator.language`, defaulting to `'en'` in Happy-DOM); inside rendered app tests (`renderApp({ language })`), switch languages via Header/Sidebar buttons or dispatch `learn_rust_lang_change` rather than mutating `document.documentElement.lang` directly.

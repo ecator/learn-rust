@@ -267,34 +267,46 @@ describe('Tier 3: Pairwise Combinations & Cross-Feature Interactions', () => {
           expect(screen.getByLabelText('Desktop Navigation')).toBeInTheDocument();
         }
 
-        // 4. Route specific target headings
+        // 4. Route specific target headings (localized per vector.lang)
+        const expectedHeadings = {
+          curriculum: {
+            zh: /Rust 完整学习路径/i,
+            en: /(The Complete Rust Learning Path|Curriculum)/i,
+            ja: /完全版 Rust 学習パス/i,
+          },
+          lesson_ownership: {
+            zh: /所有权与移动语义/i,
+            en: /Ownership & Move Semantics/i,
+            ja: /所有権とムーブセマンティクス/i,
+          },
+          visualizers: {
+            zh: /6 大核心 Rust 概念模拟器/i,
+            en: /(6 Core Rust Concept Simulators|Visualizers)/i,
+            ja: /6つの核心 Rust 概念シミュレーター/i,
+          },
+          progress: {
+            zh: /你的 Rust 学习轨迹/i,
+            en: /Your Learning Trajectory/i,
+            ja: /学習の軌跡と進捗/i,
+          },
+          notfound: {
+            zh: /哎呀！页面已离开当前作用域/i,
+            en: /(Oops! Page Has Gone Out of Scope|404)/i,
+            ja: /おっと！ページがスコープ外になりました/i,
+          },
+        } as const;
+
         switch (vector.routeKey) {
           case 'home':
             expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
             break;
           case 'curriculum':
-            expect(
-              screen.getByRole('heading', { name: /(The Complete Rust Learning Path|Curriculum)/i })
-            ).toBeInTheDocument();
-            break;
           case 'lesson_ownership':
-            expect(
-              screen.getByRole('heading', { name: /Ownership & Move Semantics/i })
-            ).toBeInTheDocument();
-            break;
           case 'visualizers':
-            expect(
-              screen.getByRole('heading', { name: /(6 Core Rust Concept Simulators|Visualizers)/i })
-            ).toBeInTheDocument();
-            break;
           case 'progress':
-            expect(
-              screen.getByRole('heading', { name: /Your Learning Trajectory/i })
-            ).toBeInTheDocument();
-            break;
           case 'notfound':
             expect(
-              screen.getByRole('heading', { name: /(Oops! Page Has Gone Out of Scope|404)/i })
+              screen.getByRole('heading', { name: expectedHeadings[vector.routeKey][vector.lang] })
             ).toBeInTheDocument();
             break;
         }
@@ -323,19 +335,21 @@ describe('Tier 3: Pairwise Combinations & Cross-Feature Interactions', () => {
         language: 'zh',
       });
 
-      expect(screen.getByRole('heading', { name: /Ownership & Move Semantics/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /所有权与移动语义/i })).toBeInTheDocument();
+      expect(screen.getByText(/课程编号：ownership-move/i)).toBeInTheDocument();
 
       // Step scrubber or interact
       const driver = new VisualizerDriver(container);
       await driver.stepForward();
 
-      // Switch language to Japanese
-      document.documentElement.lang = 'ja';
-      localStorage.setItem('learn_rust_lang', 'ja');
+      // Switch language to Japanese via UI switcher
+      await user.click(screen.getByRole('button', { name: /^日本語$/ }));
 
-      // Lesson stays mounted and active slug remains unchanged
-      expect(screen.getByRole('heading', { name: /Ownership & Move Semantics/i })).toBeInTheDocument();
-      expect(screen.getByText(/Lesson ID: ownership-move/i)).toBeInTheDocument();
+      // Lesson stays mounted, active slug remains unchanged, and content re-renders in Japanese
+      expect(
+        await screen.findByRole('heading', { name: /所有権とムーブセマンティクス/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/レッスン ID: ownership-move/i)).toBeInTheDocument();
       expect(document.documentElement.lang).toBe('ja');
     });
 

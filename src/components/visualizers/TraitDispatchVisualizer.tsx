@@ -98,7 +98,11 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Static Dispatch (impl Trait)
+          {language === 'zh'
+            ? '静态分发 Static Dispatch (impl Trait)'
+            : language === 'ja'
+            ? '静的ディスパッチ Static Dispatch (impl Trait)'
+            : 'Static Dispatch (impl Trait)'}
         </button>
         <button
           type="button"
@@ -111,7 +115,11 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Dynamic Dispatch (&amp;dyn Trait)
+          {language === 'zh'
+            ? '动态分发 Dynamic Dispatch (&dyn Trait)'
+            : language === 'ja'
+            ? '動的ディスパッチ Dynamic Dispatch (&dyn Trait)'
+            : 'Dynamic Dispatch (&dyn Trait)'}
         </button>
         <button
           type="button"
@@ -124,7 +132,11 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Cost Trade-offs
+          {language === 'zh'
+            ? '性能权衡 Cost Trade-offs'
+            : language === 'ja'
+            ? 'トレードオフ Cost Trade-offs'
+            : 'Cost Trade-offs'}
         </button>
         <button
           type="button"
@@ -137,7 +149,11 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Object Safety
+          {language === 'zh'
+            ? '对象安全性 Object Safety'
+            : language === 'ja'
+            ? 'オブジェクト安全性 Object Safety'
+            : 'Object Safety'}
         </button>
       </div>
 
@@ -145,7 +161,11 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
       {mode === 'static' && (
         <div data-testid="static-dispatch-view" className="space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            Monomorphization generates specialized functions for each concrete type with direct assembly call targets.
+            {language === 'zh'
+              ? '编译期单态化会为每种具体类型生成特化函数代码，并直接内联或静态跳转。'
+              : language === 'ja'
+              ? '単相化により具象型ごとの専用関数がコンパイル時に生成され、直接呼び出されます。'
+              : 'Monomorphization generates specialized functions for each concrete type with direct assembly call targets.'}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -173,16 +193,32 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
       {/* Dynamic Dispatch Tab */}
       {mode === 'dynamic' && (
         <div data-testid="dynamic-dispatch-view" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              <code>&amp;dyn Draw</code> is a 16-byte fat pointer consisting of Data Pointer and VTable Pointer.
+              {language === 'zh' ? (
+                <>
+                  <code>&amp;dyn Draw</code> 是 16 字节胖指针，同时保存数据指针 (Data Pointer) 与虚函数表指针 (VTable Pointer)。
+                </>
+              ) : language === 'ja' ? (
+                <>
+                  <code>&amp;dyn Draw</code> はデータポインタ (Data Pointer) と VTable ポインタ (VTable Pointer) から成る 16 バイトのファットポインタです。
+                </>
+              ) : (
+                <>
+                  <code>&amp;dyn Draw</code> is a 16-byte fat pointer consisting of Data Pointer and VTable Pointer.
+                </>
+              )}
             </p>
             <button
               type="button"
               onClick={() => setVtableStep((prev) => (prev + 1) % 3)}
-              className="rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621]"
+              className="rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621] shrink-0"
             >
-              Step Execution
+              {language === 'zh'
+                ? '单步执行 Step Execution'
+                : language === 'ja'
+                ? 'ステップ実行 Step Execution'
+                : 'Step Execution'}
             </button>
           </div>
 
@@ -237,26 +273,54 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
           <table className="w-full text-left text-xs border border-slate-200 dark:border-slate-800">
             <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
               <tr>
-                <th className="p-3">Attribute</th>
+                <th className="p-3">{language === 'zh' ? '对比维度 Attribute' : language === 'ja' ? '比較項目 Attribute' : 'Attribute'}</th>
                 <th className="p-3">Static Dispatch (impl Trait)</th>
                 <th className="p-3">Dynamic Dispatch (&amp;dyn Trait)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               <tr>
-                <td className="p-3 font-semibold">Binary Size</td>
-                <td className="p-3 text-amber-600">Larger (Code duplication via monomorphization)</td>
-                <td className="p-3 text-emerald-600">Smaller (Single shared implementation)</td>
+                <td className="p-3 font-semibold">{language === 'zh' ? '二进制体积 Binary Size' : language === 'ja' ? 'バイナリサイズ Binary Size' : 'Binary Size'}</td>
+                <td className="p-3 text-amber-600">
+                  {language === 'zh'
+                    ? '较大（按具体类型单态化展开）'
+                    : language === 'ja'
+                    ? '大きめ（単相化によるコード展開）'
+                    : 'Larger (Code duplication via monomorphization)'}
+                </td>
+                <td className="p-3 text-emerald-600">
+                  {language === 'zh'
+                    ? '更小（共享同一调用路径）'
+                    : language === 'ja'
+                    ? '小さめ（単一実装を共有）'
+                    : 'Smaller (Single shared implementation)'}
+                </td>
               </tr>
               <tr>
-                <td className="p-3 font-semibold">Runtime Indirection</td>
-                <td className="p-3 text-emerald-600">Zero cost (direct assembly call / inlining)</td>
-                <td className="p-3 text-amber-600">VTable pointer dereference + indirect call</td>
+                <td className="p-3 font-semibold">{language === 'zh' ? '运行时开销 Runtime Indirection' : language === 'ja' ? '実行時間接参照 Runtime Indirection' : 'Runtime Indirection'}</td>
+                <td className="p-3 text-emerald-600">
+                  {language === 'zh'
+                    ? '零开销（直接调用与内联优化）'
+                    : language === 'ja'
+                    ? 'ゼロコスト（直接呼び出し/インライン化）'
+                    : 'Zero cost (direct assembly call / inlining)'}
+                </td>
+                <td className="p-3 text-amber-600">
+                  {language === 'zh'
+                    ? 'VTable 指针解引用 + 间接跳转'
+                    : language === 'ja'
+                    ? 'VTable ポインタ参照 + 間接呼び出し'
+                    : 'VTable pointer dereference + indirect call'}
+                </td>
               </tr>
               <tr>
-                <td className="p-3 font-semibold">Heterogeneous Collections</td>
-                <td className="p-3 text-slate-500">No (homogeneous types only)</td>
-                <td className="p-3 text-emerald-600">Yes (Vec&lt;Box&lt;dyn Trait&gt;&gt;)</td>
+                <td className="p-3 font-semibold">{language === 'zh' ? '异构集合 Heterogeneous Collections' : language === 'ja' ? '異種コレクション Heterogeneous Collections' : 'Heterogeneous Collections'}</td>
+                <td className="p-3 text-slate-500">
+                  {language === 'zh' ? '不支持（仅限单一具体类型）' : language === 'ja' ? '不可（同種型のみ）' : 'No (homogeneous types only)'}
+                </td>
+                <td className="p-3 text-emerald-600">
+                  {language === 'zh' ? '支持 (Vec<Box<dyn Trait>>)' : language === 'ja' ? '可能 (Vec<Box<dyn Trait>>)' : 'Yes (Vec<Box<dyn Trait>>)'}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -266,16 +330,30 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
       {/* Object Safety Tab */}
       {mode === 'object_safety' && (
         <div data-testid="object-safety-view" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Toggle method returning Self:
+              {language === 'zh'
+                ? '切换返回 Self 类型的方法 Toggle method returning Self:'
+                : language === 'ja'
+                ? 'Self を返すメソッドを切り替え Toggle method returning Self:'
+                : 'Toggle method returning Self:'}
             </span>
             <button
               type="button"
               onClick={() => setHasSelfReturn(!hasSelfReturn)}
               className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
-              {hasSelfReturn ? 'Has "fn clone(&self) -> Self"' : 'Only object-safe methods'}
+              {hasSelfReturn
+                ? language === 'zh'
+                  ? '包含 "fn clone(&self) -> Self"'
+                  : language === 'ja'
+                  ? '"fn clone(&self) -> Self" を含む'
+                  : 'Has "fn clone(&self) -> Self"'
+                : language === 'zh'
+                ? '仅包含对象安全方法 (Only object-safe methods)'
+                : language === 'ja'
+                ? 'オブジェクト安全メソッドのみ (Only object-safe methods)'
+                : 'Only object-safe methods'}
             </button>
           </div>
 
@@ -291,7 +369,11 @@ export const TraitDispatchVisualizer: React.FC<VisualizerProps> = ({ className =
             </div>
           ) : (
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-700 dark:text-emerald-300">
-              Trait is object-safe! Can be used as &amp;dyn Trait.
+              {language === 'zh'
+                ? '满足对象安全性！可安全作为 &dyn Trait 使用。'
+                : language === 'ja'
+                ? 'オブジェクト安全です！&dyn Trait として使用できます。'
+                : 'Trait is object-safe! Can be used as &dyn Trait.'}
             </div>
           )}
         </div>

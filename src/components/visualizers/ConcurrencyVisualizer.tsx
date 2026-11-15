@@ -153,7 +153,11 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          MPSC Channel
+          {language === 'zh'
+            ? 'MPSC 通道 (MPSC Channel)'
+            : language === 'ja'
+            ? 'MPSC チャネル (MPSC Channel)'
+            : 'MPSC Channel'}
         </button>
         <button
           type="button"
@@ -179,7 +183,11 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Deadlock Scenario
+          {language === 'zh'
+            ? '死锁场景 (Deadlock Scenario)'
+            : language === 'ja'
+            ? 'デッドロック (Deadlock Scenario)'
+            : 'Deadlock Scenario'}
         </button>
         <button
           type="button"
@@ -192,31 +200,41 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Thread Spawn/Join
+          {language === 'zh'
+            ? '线程派生与合并 (Thread Spawn/Join)'
+            : language === 'ja'
+            ? 'スレッド生成・待機 (Thread Spawn/Join)'
+            : 'Thread Spawn/Join'}
         </button>
       </div>
 
       {/* MPSC Channel View */}
       {mode === 'channel' && (
         <div data-testid="channel-view" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Multiple Producer, Single Consumer: Producers send data packets across a thread boundary.
+              {language === 'zh'
+                ? '多生产者单消费者 (MPSC)：生产者将数据所有权安全跨越线程边界发送到接收端。'
+                : language === 'ja'
+                ? '複数プロデューサー・単一コンシューマー：送信側がスレッド境界を越えて所有権付きでデータを渡します。'
+                : 'Multiple Producer, Single Consumer: Producers send data packets across a thread boundary.'}
             </p>
             <button
               type="button"
               onClick={sendMessage}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621] shrink-0"
             >
               <Send className="h-3.5 w-3.5" />
-              <span>Send Message</span>
+              <span>
+                {language === 'zh' ? '发送消息 Send Message' : language === 'ja' ? '送信 Send Message' : 'Send Message'}
+              </span>
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             <div className="rounded-xl border border-slate-200 p-4 text-center dark:border-slate-800">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Producer Thread (tx)
+                {language === 'zh' ? '发送线程 Producer Thread (tx)' : language === 'ja' ? '送信スレッド Producer Thread (tx)' : 'Producer Thread (tx)'}
               </span>
               <p className="mt-2 text-xs font-mono text-slate-600 dark:text-slate-400">tx.send(msg)</p>
             </div>
@@ -236,7 +254,7 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
 
             <div className="rounded-xl border border-slate-200 p-4 text-center dark:border-slate-800">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Receiver Thread (rx)
+                {language === 'zh' ? '接收线程 Receiver Thread (rx)' : language === 'ja' ? '受信スレッド Receiver Thread (rx)' : 'Receiver Thread (rx)'}
               </span>
               <p className="mt-2 text-xs font-mono text-slate-600 dark:text-slate-400">rx.recv()</p>
             </div>
@@ -247,17 +265,27 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
       {/* Mutex Contention View */}
       {mode === 'mutex' && (
         <div data-testid="mutex-view" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Simulate contention on a shared <code>Arc&lt;Mutex&lt;u32&gt;&gt;</code>.
+              {language === 'zh' ? (
+                <>模拟多线程对共享互斥锁 <code>Arc&lt;Mutex&lt;u32&gt;&gt;</code> 的争用与轮转。</>
+              ) : language === 'ja' ? (
+                <>共有ミューテックス <code>Arc&lt;Mutex&lt;u32&gt;&gt;</code> の競合とロック引き渡しをシミュレートします。</>
+              ) : (
+                <>Simulate contention on a shared <code>Arc&lt;Mutex&lt;u32&gt;&gt;</code>.</>
+              )}
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setMutexHolder('Thread 1')}
                 className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
               >
-                Thread 1: Acquire Lock
+                {language === 'zh'
+                  ? 'Thread 1: Acquire Lock (获取锁)'
+                  : language === 'ja'
+                  ? 'Thread 1: Acquire Lock (ロック取得)'
+                  : 'Thread 1: Acquire Lock'}
               </button>
               <button
                 type="button"
@@ -271,14 +299,14 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
                 }}
                 className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
               >
-                Thread 2: Acquire / Handoff
+                {language === 'zh' ? 'Thread 2: 获取/交接 Acquire / Handoff' : language === 'ja' ? 'Thread 2: 取得/引き継ぎ Acquire / Handoff' : 'Thread 2: Acquire / Handoff'}
               </button>
               <button
                 type="button"
                 onClick={() => setMutexHolder(null)}
                 className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700"
               >
-                Release Lock
+                {language === 'zh' ? '释放锁 Release Lock' : language === 'ja' ? 'ロック解放 Release Lock' : 'Release Lock'}
               </button>
             </div>
           </div>
@@ -304,9 +332,21 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
                   }
                 >
                   {mutexHolder === 'Thread 1'
-                    ? 'Holding Lock'
+                    ? language === 'zh'
+                      ? '持有锁 Holding Lock'
+                      : language === 'ja'
+                      ? 'ロック保持 Holding Lock'
+                      : 'Holding Lock'
                     : mutexHolder === 'Thread 2'
-                    ? 'Waiting/Blocked'
+                    ? language === 'zh'
+                      ? '等待阻塞 Waiting/Blocked'
+                      : language === 'ja'
+                      ? '待機ブロック Waiting/Blocked'
+                      : 'Waiting/Blocked'
+                    : language === 'zh'
+                    ? '空闲 Idle'
+                    : language === 'ja'
+                    ? '待機 Idle'
                     : 'Idle'}
                 </span>
               </div>
@@ -332,9 +372,21 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
                   }
                 >
                   {mutexHolder === 'Thread 2'
-                    ? 'Holding Lock'
+                    ? language === 'zh'
+                      ? '持有锁 Holding Lock'
+                      : language === 'ja'
+                      ? 'ロック保持 Holding Lock'
+                      : 'Holding Lock'
                     : mutexHolder === 'Thread 1'
-                    ? 'Waiting/Blocked'
+                    ? language === 'zh'
+                      ? '等待阻塞 Waiting/Blocked'
+                      : language === 'ja'
+                      ? '待機ブロック Waiting/Blocked'
+                      : 'Waiting/Blocked'
+                    : language === 'zh'
+                    ? '空闲 Idle'
+                    : language === 'ja'
+                    ? '待機 Idle'
                     : 'Idle'}
                 </span>
               </div>
@@ -342,7 +394,13 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
           </div>
 
           <div className="rounded-xl border border-slate-200 p-4 text-center dark:border-slate-800">
-            <span className="text-xs font-mono">Shared Counter Value: </span>
+            <span className="text-xs font-mono">
+              {language === 'zh'
+                ? '共享计数器 Shared Counter Value: '
+                : language === 'ja'
+                ? '共有カウンタ値 Shared Counter Value: '
+                : 'Shared Counter Value: '}
+            </span>
             <span className="text-base font-bold font-mono text-[#CE412B]">{counterValue}</span>
           </div>
         </div>
@@ -351,16 +409,30 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
       {/* Deadlock View */}
       {mode === 'deadlock' && (
         <div data-testid="deadlock-view" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Thread A locks L1 then waits for L2; Thread B locks L2 then waits for L1.
+              {language === 'zh'
+                ? '线程 A 持有 Lock 1 并等待 Lock 2；同时线程 B 持有 Lock 2 并等待 Lock 1，形成循环等待死锁。'
+                : language === 'ja'
+                ? 'スレッド A は Lock 1 を保持して Lock 2 を待ち、スレッド B は Lock 2 を保持して Lock 1 を待つ循環待ち状態です。'
+                : 'Thread A locks L1 then waits for L2; Thread B locks L2 then waits for L1.'}
             </p>
             <button
               type="button"
               onClick={() => setIsDeadlocked(!isDeadlocked)}
-              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 shrink-0"
             >
-              {isDeadlocked ? 'Resolve Deadlock' : 'Simulate Deadlock'}
+              {isDeadlocked
+                ? language === 'zh'
+                  ? '解除死锁 Resolve Deadlock'
+                  : language === 'ja'
+                  ? 'デッドロック解除 Resolve Deadlock'
+                  : 'Resolve Deadlock'
+                : language === 'zh'
+                ? '模拟死锁 Simulate Deadlock'
+                : language === 'ja'
+                ? 'デッドロック発生 Simulate Deadlock'
+                : 'Simulate Deadlock'}
             </button>
           </div>
 
@@ -372,7 +444,13 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
               className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-700 dark:text-red-300 flex items-center gap-2"
             >
               <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
-              <span>Deadlock Warning: Both Thread A and Thread B are mutually blocked on lock acquisition!</span>
+              <span>
+                {language === 'zh'
+                  ? '死锁警告 Deadlock Warning：Thread A 与 Thread B 相互无限阻塞在锁获取步骤！'
+                  : language === 'ja'
+                  ? 'デッドロック警告 Deadlock Warning: Thread A と Thread B が互いにロック待ちで永久停止しています！'
+                  : 'Deadlock Warning: Both Thread A and Thread B are mutually blocked on lock acquisition!'}
+              </span>
             </div>
           )}
 
@@ -403,7 +481,7 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
               }}
               className="rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621]"
             >
-              Spawn Thread
+              {language === 'zh' ? '派生线程 Spawn Thread' : language === 'ja' ? 'スレッド生成 Spawn Thread' : 'Spawn Thread'}
             </button>
             <button
               type="button"
@@ -411,7 +489,7 @@ export const ConcurrencyVisualizer: React.FC<VisualizerProps> = ({ className = '
               onClick={() => setThreadJoined(true)}
               className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
             >
-              Join Thread
+              {language === 'zh' ? '等待汇合 Join Thread' : language === 'ja' ? '合流待機 Join Thread' : 'Join Thread'}
             </button>
           </div>
 

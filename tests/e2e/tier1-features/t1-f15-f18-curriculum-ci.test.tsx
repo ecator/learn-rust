@@ -25,16 +25,28 @@ describe('Tier 1: Curriculum, Quizzes, CI/CD & Docs (F15 - F18)', () => {
     });
 
     it('TC-T1-F15-02: Tri-lingual Content Availability', () => {
-      const { rerender } = renderApp({ route: '/learn-rust/lesson/hello-ferris', language: 'zh' });
+      const zhView = renderApp({ route: '/learn-rust/lesson/hello-ferris', language: 'zh' });
       expect(document.documentElement.lang).toBe('zh');
+      expect(
+        screen.getByRole('heading', { name: /你好 Ferris 与 Cargo 基础/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/课程编号：hello-ferris/i)).toBeInTheDocument();
+      zhView.unmount();
 
-      rerender(<></>);
-      renderApp({ route: '/learn-rust/lesson/hello-ferris', language: 'en' });
+      const enView = renderApp({ route: '/learn-rust/lesson/hello-ferris', language: 'en' });
       expect(document.documentElement.lang).toBe('en');
+      expect(
+        screen.getByRole('heading', { name: /Hello Ferris & Cargo Basics/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Lesson ID: hello-ferris/i)).toBeInTheDocument();
+      enView.unmount();
 
-      rerender(<></>);
       renderApp({ route: '/learn-rust/lesson/hello-ferris', language: 'ja' });
       expect(document.documentElement.lang).toBe('ja');
+      expect(
+        screen.getByRole('heading', { name: /Hello Ferris と Cargo の基本/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/レッスン ID: hello-ferris/i)).toBeInTheDocument();
     });
 
     it('TC-T1-F15-03: Syntax-Highlighted Code Snippets Rendering', () => {

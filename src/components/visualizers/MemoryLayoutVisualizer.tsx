@@ -209,7 +209,11 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Slice (&amp;s[1..4])
+          {language === 'zh'
+            ? '切片 Slice (&s[1..4])'
+            : language === 'ja'
+            ? 'スライス Slice (&s[1..4])'
+            : 'Slice (&s[1..4])'}
         </button>
         <button
           type="button"
@@ -222,7 +226,11 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Vec Reallocation
+          {language === 'zh'
+            ? 'Vec 扩容重分配 (Vec Reallocation)'
+            : language === 'ja'
+            ? 'Vec 再割り当て (Vec Reallocation)'
+            : 'Vec Reallocation'}
         </button>
         <button
           type="button"
@@ -235,7 +243,11 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Struct Padding
+          {language === 'zh'
+            ? '结构体对齐填充 (Struct Padding)'
+            : language === 'ja'
+            ? '構造体パディング (Struct Padding)'
+            : 'Struct Padding'}
         </button>
         <button
           type="button"
@@ -248,7 +260,11 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Zero-Sized Type (ZST)
+          {language === 'zh'
+            ? '零大小类型 Zero-Sized Type (ZST)'
+            : language === 'ja'
+            ? 'ゼロサイズ型 Zero-Sized Type (ZST)'
+            : 'Zero-Sized Type (ZST)'}
         </button>
       </div>
 
@@ -275,14 +291,30 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
       {activeTab === 'string_str' && (
         <div data-testid="layout-string-str" className="space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            A <code>String</code> is a 3-word struct (24 bytes on 64-bit: ptr, cap, len) owning heap memory,
-            while <code>&amp;str</code> is a 2-word fat pointer (16 bytes: ptr, len) referencing a borrowed slice.
+            {language === 'zh' ? (
+              <>
+                <code>String</code> 是一个栈上 3 字结构体 — 3-word struct (24 bytes on 64-bit: ptr, cap, len) — 并拥有堆缓冲区所有权；而 <code>&amp;str</code> 是只借用切片数据的双字胖指针（16 bytes: ptr, len）。
+              </>
+            ) : language === 'ja' ? (
+              <>
+                <code>String</code> はヒープを所有する 3-word struct (24 bytes on 64-bit: ptr, cap, len) であり、<code>&amp;str</code> は借用スライスを指す 2 ワードのファットポインタ（16 bytes: ptr, len）です。
+              </>
+            ) : (
+              <>
+                A <code>String</code> is a 3-word struct (24 bytes on 64-bit: ptr, cap, len) owning heap memory,
+                while <code>&amp;str</code> is a 2-word fat pointer (16 bytes: ptr, len) referencing a borrowed slice.
+              </>
+            )}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                String (3 Words: 24 bytes)
+                {language === 'zh'
+                  ? 'String (3 Words: 24 bytes / 栈上 3 字)'
+                  : language === 'ja'
+                  ? 'String (3 Words: 24 bytes / 3ワード)'
+                  : 'String (3 Words: 24 bytes)'}
               </h4>
               <div className="mt-3 grid grid-cols-3 gap-2 font-mono text-xs">
                 <div className="rounded bg-slate-100 p-2 text-center dark:bg-slate-800">ptr: 0x2000</div>
@@ -293,7 +325,11 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
 
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                &amp;str Fat Pointer (2 Words: 16 bytes)
+                {language === 'zh'
+                  ? '&str Fat Pointer (2 Words: 16 bytes / 胖指针)'
+                  : language === 'ja'
+                  ? '&str Fat Pointer (2 Words: 16 bytes / ファットポインタ)'
+                  : '&str Fat Pointer (2 Words: 16 bytes)'}
               </h4>
               <div className="mt-3 grid grid-cols-2 gap-2 font-mono text-xs">
                 <div className="rounded bg-slate-100 p-2 text-center dark:bg-slate-800">ptr: 0x2000</div>
@@ -307,7 +343,13 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
       {activeTab === 'slice' && (
         <div data-testid="layout-slice" className="space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            Slice <code>&amp;s[1..4]</code> offsets pointer by +1 byte and sets length to 3 bytes.
+            {language === 'zh' ? (
+              <>切片 <code>&amp;s[1..4]</code> 无需拷贝底层字符串，仅将指针向后移动 1 字节并设置长度 len = 3。</>
+            ) : language === 'ja' ? (
+              <>スライス <code>&amp;s[1..4]</code> はヒープを複製せず、ポインタを 1 バイトだけ進めて長さ 3 を指します。</>
+            ) : (
+              <>Slice <code>&amp;s[1..4]</code> offsets pointer by +1 byte and sets length to 3 bytes.</>
+            )}
           </p>
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 space-y-3">
             <div className="grid grid-cols-2 gap-2 font-mono text-xs">
@@ -334,17 +376,25 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
 
       {activeTab === 'vec' && (
         <div data-testid="layout-vec" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              When length exceeds capacity, vector reallocates to double capacity.
+              {language === 'zh'
+                ? '当元素长度超出容量 cap 时，Vec 会按倍增策略重新申请更大的堆内存块并搬移数据。'
+                : language === 'ja'
+                ? '長さが容量 (cap) を超えると、Vec は通常 2 倍の新しいヒープ領域を再割り当てします。'
+                : 'When length exceeds capacity, vector reallocates to double capacity.'}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               <button
                 type="button"
                 onClick={triggerVecPush}
                 className="rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621]"
               >
-                Push Item (vec.push)
+                {language === 'zh'
+                  ? '压入元素 Push Item (vec.push)'
+                  : language === 'ja'
+                  ? '要素追加 Push Item (vec.push)'
+                  : 'Push Item (vec.push)'}
               </button>
               <button
                 type="button"
@@ -359,10 +409,12 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
 
           <div className="grid grid-cols-2 gap-4 font-mono text-xs">
             <div className="rounded-xl border p-4 text-center dark:border-slate-800">
-              Length: <span className="font-bold text-[#CE412B]">{vecLen}</span>
+              {language === 'zh' ? '当前长度 Length' : language === 'ja' ? '長さ Length' : 'Length'}:{' '}
+              <span className="font-bold text-[#CE412B]">{vecLen}</span>
             </div>
             <div className="rounded-xl border p-4 text-center dark:border-slate-800">
-              Capacity: <span className="font-bold text-blue-600">{vecCap}</span>
+              {language === 'zh' ? '分配容量 Capacity' : language === 'ja' ? '容量 Capacity' : 'Capacity'}:{' '}
+              <span className="font-bold text-blue-600">{vecCap}</span>
             </div>
           </div>
         </div>
@@ -371,8 +423,20 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
       {activeTab === 'padding' && (
         <div data-testid="layout-padding" className="space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            <code>struct Foo &#123; a: u8, b: u64, c: u16 &#125;</code> requires 8-byte alignment, producing
-            1-byte (a) + 7-byte padding + 8-byte (b) + 2-byte (c) + 6-byte tail padding = 24 bytes total.
+            {language === 'zh' ? (
+              <>
+                <code>struct Foo &#123; a: u8, b: u64, c: u16 &#125;</code> 按最大字段 8 字节对齐：1 字节 (a) + 7-byte padding + 8 字节 (b) + 2 字节 (c) + 6-byte padding = 24 bytes。
+              </>
+            ) : language === 'ja' ? (
+              <>
+                <code>struct Foo &#123; a: u8, b: u64, c: u16 &#125;</code> は 8 バイト境界に整列され、1B (a) + 7-byte padding + 8B (b) + 2B (c) + 6-byte padding = 合計 24 バイトになります。
+              </>
+            ) : (
+              <>
+                <code>struct Foo &#123; a: u8, b: u64, c: u16 &#125;</code> requires 8-byte alignment, producing
+                1-byte (a) + 7-byte padding + 8-byte (b) + 2-byte (c) + 6-byte tail padding = 24 bytes total.
+              </>
+            )}
           </p>
 
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
@@ -397,7 +461,19 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
       {activeTab === 'zst' && (
         <div data-testid="layout-zst" className="space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            Zero-Sized Types like <code>()</code> or <code>struct Unit;</code> take 0 bytes of memory and require no heap allocation.
+            {language === 'zh' ? (
+              <>
+                类似单元类型 <code>()</code> 或空标记结构体 <code>struct Unit;</code> 的零大小类型占用 0 bytes 且无需堆内存分配 (require no heap allocation)。
+              </>
+            ) : language === 'ja' ? (
+              <>
+                <code>()</code> や <code>struct Unit;</code> のようなゼロサイズ型はメモリを 0 bytes しか消費せず、ヒープ割り当て不要 (require no heap allocation) です。
+              </>
+            ) : (
+              <>
+                Zero-Sized Types like <code>()</code> or <code>struct Unit;</code> take 0 bytes of memory and require no heap allocation.
+              </>
+            )}
           </p>
 
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 grid grid-cols-2 gap-4 font-mono text-xs text-center">

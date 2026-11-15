@@ -113,7 +113,11 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Result Railway
+          {language === 'zh'
+            ? 'Result 铁路流 (Result Railway)'
+            : language === 'ja'
+            ? 'Result レールウェイ (Result Railway)'
+            : 'Result Railway'}
         </button>
         <button
           type="button"
@@ -126,7 +130,11 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Option Combinators
+          {language === 'zh'
+            ? 'Option 组合子 (Option Combinators)'
+            : language === 'ja'
+            ? 'Option コンビネータ (Option Combinators)'
+            : 'Option Combinators'}
         </button>
         <button
           type="button"
@@ -139,7 +147,11 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          Panic vs Recoverable
+          {language === 'zh'
+            ? 'Panic 与可恢复错误 (Panic vs Recoverable)'
+            : language === 'ja'
+            ? 'Panic と回復可能エラー (Panic vs Recoverable)'
+            : 'Panic vs Recoverable'}
         </button>
         <button
           type="button"
@@ -152,17 +164,25 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
               : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
           }`}
         >
-          From/Into Conversion
+          {language === 'zh'
+            ? 'From/Into 自动错误转换 (From/Into Conversion)'
+            : language === 'ja'
+            ? 'From/Into エラー変換 (From/Into Conversion)'
+            : 'From/Into Conversion'}
         </button>
       </div>
 
       {/* Railway Track View */}
       {tab === 'railway' && (
         <div data-testid="railway-view" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Input string validity:
+                {language === 'zh'
+                  ? '输入校验状态：'
+                  : language === 'ja'
+                  ? '入力データの妥当性：'
+                  : 'Input string validity:'}
               </span>
               <button
                 type="button"
@@ -174,7 +194,17 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
                   isInputValid ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
                 }`}
               >
-                {isInputValid ? 'Valid Input' : 'Invalid Input'}
+                {isInputValid
+                  ? language === 'zh'
+                    ? '有效输入 (Valid Input)'
+                    : language === 'ja'
+                    ? '有効入力 (Valid Input)'
+                    : 'Valid Input'
+                  : language === 'zh'
+                  ? '无效输入 (Invalid Input)'
+                  : language === 'ja'
+                  ? '不正入力 (Invalid Input)'
+                  : 'Invalid Input'}
               </button>
             </div>
 
@@ -183,7 +213,11 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
               onClick={() => setRailwayStep((prev) => (prev + 1) % 4)}
               className="rounded-lg bg-[#CE412B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#B33621]"
             >
-              Step Track
+              {language === 'zh'
+                ? '单步推进 Step Track'
+                : language === 'ja'
+                ? 'トラック進行 Step Track'
+                : 'Step Track'}
             </button>
           </div>
 
@@ -191,7 +225,13 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
           <div className="rounded-xl border border-slate-200 p-6 dark:border-slate-800 space-y-6">
             {/* Green Ok Track */}
             <div className="space-y-1">
-              <span className="text-xs font-bold text-emerald-600">Green Track (Ok Path)</span>
+              <span className="text-xs font-bold text-emerald-600">
+                {language === 'zh'
+                  ? '成功绿轨 Green Track (Ok Path)'
+                  : language === 'ja'
+                  ? '正常トラック Green Track (Ok Path)'
+                  : 'Green Track (Ok Path)'}
+              </span>
               <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
                 <div className={`p-2 rounded border ${railwayStep >= 0 ? 'bg-emerald-100 border-emerald-500 text-emerald-800' : 'bg-slate-100'}`}>
                   parse_input()
@@ -231,14 +271,26 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
 
             {/* Red Err Track */}
             <div className="space-y-1 pl-4 md:pl-28">
-              <span className="text-xs font-bold text-red-600">Red Track (Err Divert)</span>
+              <span className="text-xs font-bold text-red-600">
+                {language === 'zh'
+                  ? '错误红轨 Red Track (Err Divert)'
+                  : language === 'ja'
+                  ? 'エラー分岐 Red Track (Err Divert)'
+                  : 'Red Track (Err Divert)'}
+              </span>
               <div className="flex items-center gap-3 font-mono text-xs">
                 {!isInputValid && railwayStep >= 1 ? (
                   <div className="p-2 rounded border border-red-500 bg-red-100 text-red-800 font-bold">
                     Err(ValidationError) [Early Return]
                   </div>
                 ) : (
-                  <div className="p-2 text-slate-400 italic">No errors triggered</div>
+                  <div className="p-2 text-slate-400 italic">
+                    {language === 'zh'
+                      ? '暂未触发错误 (No errors triggered)'
+                      : language === 'ja'
+                      ? 'エラー未発生 (No errors triggered)'
+                      : 'No errors triggered'}
+                  </div>
                 )}
               </div>
             </div>
@@ -250,12 +302,18 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
       {tab === 'option' && (
         <div data-testid="option-view" className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold">Select Option variant:</span>
+            <span className="text-xs font-semibold">
+              {language === 'zh'
+                ? '选择 Option 枚举变体：'
+                : language === 'ja'
+                ? 'Option バリアントを選択：'
+                : 'Select Option variant:'}
+            </span>
             <button
               type="button"
               onClick={() => setOptionValue('some')}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
-                optionValue === 'some' ? 'bg-blue-600 text-white' : 'bg-slate-100'
+                optionValue === 'some' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800'
               }`}
             >
               Some(5)
@@ -264,7 +322,7 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
               type="button"
               onClick={() => setOptionValue('none')}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
-                optionValue === 'none' ? 'bg-slate-600 text-white' : 'bg-slate-100'
+                optionValue === 'none' ? 'bg-slate-600 text-white' : 'bg-slate-100 dark:bg-slate-800'
               }`}
             >
               None
@@ -273,7 +331,8 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
 
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 space-y-2 font-mono text-xs">
             <div>
-              Pipeline: <code>opt.map(|x| x * 2).unwrap_or(0)</code>
+              {language === 'zh' ? '组合子管道 Pipeline' : language === 'ja' ? 'パイプライン Pipeline' : 'Pipeline'}:{' '}
+              <code>opt.map(|x| x * 2).unwrap_or(0)</code>
             </div>
             <div className="rounded bg-slate-100 p-3 dark:bg-slate-800">
               Result:{' '}
@@ -293,7 +352,11 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
             onClick={() => setHasPanicked(true)}
             className="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700"
           >
-            Trigger unwrap() on None
+            {language === 'zh'
+              ? '对 None 触发 Trigger unwrap() on None'
+              : language === 'ja'
+              ? 'None に対して実行 Trigger unwrap() on None'
+              : 'Trigger unwrap() on None'}
           </button>
 
           {hasPanicked && (
@@ -304,7 +367,11 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
                   thread 'main' panicked at 'called `Option::unwrap()` on a `None` value'
                 </span>
                 <p className="text-slate-600 dark:text-slate-400 font-mono text-[11px]">
-                  stack backtrace: unwinding stack frames...
+                  {language === 'zh'
+                    ? '调用栈回溯：正在展开栈帧 stack backtrace: unwinding stack frames...'
+                    : language === 'ja'
+                    ? 'バックトレース：スタックフレームを巻き戻しています unwinding stack frames...'
+                    : 'stack backtrace: unwinding stack frames...'}
                 </p>
               </div>
             </div>
@@ -316,7 +383,19 @@ export const ErrorHandlingVisualizer: React.FC<VisualizerProps> = ({ className =
       {tab === 'from_into' && (
         <div data-testid="from-into-view" className="space-y-4">
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            The <code>?</code> operator converts heterogeneous error types automatically using <code>From::from</code>.
+            {language === 'zh' ? (
+              <>
+                <code>?</code> 运算符会借助标准库的 <code>From::from</code> 自动将底层错误类型转换为外层函数的统一错误类型。
+              </>
+            ) : language === 'ja' ? (
+              <>
+                <code>?</code> 演算子は <code>From::from</code> を呼び出し、異なるエラー型を戻り値のエラー型へ自動変換します。
+              </>
+            ) : (
+              <>
+                The <code>?</code> operator converts heterogeneous error types automatically using <code>From::from</code>.
+              </>
+            )}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 font-mono text-xs">

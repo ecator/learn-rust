@@ -1,14 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
-
-const segmentLabels: Record<string, string> = {
-  curriculum: 'Curriculum',
-  lesson: 'Curriculum',
-  lessons: 'Curriculum',
-  visualizers: 'Visualizers',
-  progress: 'Progress',
-};
+import { useI18n } from '@/lib/i18n';
+import { getLocalizedLesson } from '@/lib/i18n/curriculumData';
 
 const slugToTitle = (slug: string): string => {
   return slug
@@ -19,20 +13,34 @@ const slugToTitle = (slug: string): string => {
 
 export const Breadcrumbs: React.FC = () => {
   const location = useLocation();
+  const { language, t } = useI18n();
   const pathnames = location.pathname.split('/').filter(Boolean);
 
   if (pathnames.length === 0) {
     return null;
   }
 
-  const items = [{ label: 'Home', href: '/' }];
+  const segmentLabels: Record<string, string> = {
+    curriculum: t('nav.curriculum'),
+    lesson: t('nav.curriculum'),
+    lessons: t('nav.curriculum'),
+    visualizers: t('nav.visualizers'),
+    progress: t('nav.progress'),
+  };
+
+  const items = [{ label: t('nav.home'), href: '/' }];
 
   let currentPath = '';
   pathnames.forEach((segment, index) => {
     currentPath += `/${segment}`;
     const isLast = index === pathnames.length - 1;
 
-    let label = segmentLabels[segment] || slugToTitle(segment);
+    const lessonMatch = getLocalizedLesson(segment, language);
+    const label =
+      segmentLabels[segment] ||
+      (language === 'en'
+        ? slugToTitle(segment)
+        : lessonMatch?.title || slugToTitle(segment));
     // If the path is /lesson/:slug or /lessons/:slug, label "Curriculum" linking to /curriculum
     let href = currentPath;
     if (segment === 'lesson' || segment === 'lessons') {

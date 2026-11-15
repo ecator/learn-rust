@@ -80,10 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const cycleLanguage = () => {
-    const langOrder: SupportedLanguage[] = ['zh', 'en', 'ja'];
-    const nextIndex = (langOrder.indexOf(currentLang) + 1) % langOrder.length;
-    const nextLang = langOrder[nextIndex];
+  const selectLanguage = (nextLang: SupportedLanguage) => {
     setCurrentLang(nextLang);
     setLanguage(nextLang);
     if (typeof document !== 'undefined') {
@@ -93,6 +90,22 @@ export const Header: React.FC<HeaderProps> = ({
       localStorage.setItem('learn_rust_lang', nextLang);
     } catch {}
   };
+
+  const cycleLanguage = () => {
+    const langOrder: SupportedLanguage[] = ['zh', 'en', 'ja'];
+    const nextIndex = (langOrder.indexOf(currentLang) + 1) % langOrder.length;
+    selectLanguage(langOrder[nextIndex]);
+  };
+
+  const languageOptions: Array<{
+    code: SupportedLanguage;
+    label: string;
+    title: string;
+  }> = [
+    { code: 'zh', label: '中文', title: '简体中文' },
+    { code: 'en', label: 'EN', title: 'English' },
+    { code: 'ja', label: '日本語', title: '日本語' },
+  ];
 
   const navItems = [
     { key: 'home', name: 'Home', path: '/', icon: Home, end: true },
@@ -111,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={onToggleSidebar}
               aria-label={isSidebarOpen ? 'Close navigation drawer' : 'Open navigation drawer'}
+              title={isSidebarOpen ? t('nav.closeNav') : t('nav.openNav')}
               className="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden focus:outline-none focus:ring-2 focus:ring-[#CE412B]"
             >
               {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -125,13 +139,13 @@ export const Header: React.FC<HeaderProps> = ({
             <FerrisIcon size={36} className="shrink-0 drop-shadow-sm" />
             <div className="flex flex-col">
               <span className="font-bold tracking-tight text-slate-900 dark:text-white text-lg leading-tight flex items-center gap-1.5">
-                Learn Rust
+                {t('common.appName')}
                 <span className="rounded-full bg-[#CE412B]/10 px-2 py-0.5 text-xs font-semibold text-[#CE412B] dark:bg-[#CE412B]/20">
-                  v0.1
+                  {t('common.version')}
                 </span>
               </span>
               <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                Interactive Crab Lab
+                {t('common.tagline')}
               </span>
             </div>
           </Link>
@@ -141,13 +155,14 @@ export const Header: React.FC<HeaderProps> = ({
         <nav className="hidden lg:flex items-center gap-1" aria-label="Desktop Navigation">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const label = t(`nav.${item.key}`) || item.name;
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
                 end={item.end}
-                aria-label={item.name}
-                title={t(`nav.${item.key}`) || item.name}
+                aria-label={label}
+                title={label}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
@@ -158,7 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
                 }
               >
                 <Icon className="h-4 w-4" />
-                <span>{item.name}</span>
+                <span>{label}</span>
               </NavLink>
             );
           })}
@@ -166,23 +181,52 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Actions (Language, Theme, GitHub) */}
         <div className="flex items-center gap-2">
-          {/* Language Selector Slot */}
-          <button
-            type="button"
-            onClick={cycleLanguage}
-            aria-label="Change language (ZH / EN / JA)"
-            title="Language selector (Milestone 2 full dictionary)"
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+          {/* Segmented Pill Language Switcher */}
+          <div
+            role="group"
+            aria-label={t('nav.languageLabel')}
+            data-testid="language-switcher"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90"
           >
-            <Globe className="h-4 w-4 text-[#CE412B]" />
-            <span className="hidden sm:inline">中 / EN / 日</span>
-          </button>
+            <button
+              type="button"
+              onClick={cycleLanguage}
+              aria-label="Change language (ZH / EN / JA)"
+              data-testid="language-cycle-button"
+              title={t('nav.languageToggle')}
+              className="inline-flex items-center justify-center rounded-full p-1.5 text-[#CE412B] hover:bg-white dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE412B]"
+            >
+              <Globe className="h-4 w-4" />
+            </button>
+            {languageOptions.map((option) => {
+              const active = currentLang === option.code;
+              return (
+                <button
+                  key={option.code}
+                  type="button"
+                  onClick={() => selectLanguage(option.code)}
+                  aria-pressed={active}
+                  data-testid={`lang-option-${option.code}`}
+                  title={option.title}
+                  className={cn(
+                    'rounded-full px-1.5 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-[#CE412B]',
+                    active
+                      ? 'bg-[#CE412B] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/70 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700/70'
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
 
           {/* Theme Toggle Slot */}
           <button
             type="button"
             onClick={toggleTheme}
             aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={isDark ? t('nav.themeToggleLight') : t('nav.themeToggleDark')}
             className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE412B]"
           >
             {isDark ? (

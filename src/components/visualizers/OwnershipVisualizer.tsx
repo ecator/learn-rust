@@ -271,9 +271,19 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Stack Memory
+                {language === 'zh'
+                  ? '栈内存 Stack Memory'
+                  : language === 'ja'
+                  ? 'スタックメモリ Stack Memory'
+                  : 'Stack Memory'}
               </span>
-              <span className="text-[10px] font-mono text-slate-400">Fixed-size frames</span>
+              <span className="text-[10px] font-mono text-slate-400">
+                {language === 'zh'
+                  ? '定长栈帧 (Fixed-size frames)'
+                  : language === 'ja'
+                  ? '固定長フレーム (Fixed-size frames)'
+                  : 'Fixed-size frames'}
+              </span>
             </div>
 
             <div className="mt-3 space-y-3">
@@ -289,11 +299,15 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
                   <span>s1: String</span>
                   {step >= 1 && simulateError ? (
                     <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-600 font-bold">
-                      Moved/Invalidated
+                      {language === 'zh'
+                        ? '已移动/失效 (Moved/Invalidated)'
+                        : language === 'ja'
+                        ? 'ムーブ済み/無効 (Moved/Invalidated)'
+                        : 'Moved/Invalidated'}
                     </span>
                   ) : (
                     <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-600 font-bold">
-                      Valid
+                      {language === 'zh' ? '有效 (Valid)' : language === 'ja' ? '有効 (Valid)' : 'Valid'}
                     </span>
                   )}
                 </div>
@@ -308,7 +322,13 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
               {step >= 1 && step < 3 && (
                 <div className="rounded-lg p-3 border border-emerald-400 bg-emerald-50/30 dark:border-emerald-600 dark:bg-emerald-950/20">
                   <div className="flex items-center justify-between text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                    <span>s2: String (Valid Owner)</span>
+                    <span>
+                      {language === 'zh'
+                        ? 's2: String (Valid Owner / 当前有效所有者)'
+                        : language === 'ja'
+                        ? 's2: String (Valid Owner / 有効な所有者)'
+                        : 's2: String (Valid Owner)'}
+                    </span>
                   </div>
                   <div className="mt-2 grid grid-cols-3 gap-2 font-mono text-[11px] text-slate-600 dark:text-slate-300">
                     <div className="rounded bg-slate-100 p-1 text-center dark:bg-slate-700">
@@ -326,9 +346,19 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
           <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Heap Memory
+                {language === 'zh'
+                  ? '堆内存 Heap Memory'
+                  : language === 'ja'
+                  ? 'ヒープメモリ Heap Memory'
+                  : 'Heap Memory'}
               </span>
-              <span className="text-[10px] font-mono text-slate-400">Dynamic buffers</span>
+              <span className="text-[10px] font-mono text-slate-400">
+                {language === 'zh'
+                  ? '动态缓冲区 (Dynamic buffers)'
+                  : language === 'ja'
+                  ? '動的バッファ (Dynamic buffers)'
+                  : 'Dynamic buffers'}
+              </span>
             </div>
 
             <div className="mt-3 space-y-3">
@@ -351,7 +381,11 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400 dark:border-slate-700">
-                  Heap memory deallocated (drop(s2) executed)
+                  {language === 'zh'
+                    ? '堆内存已自动释放 Heap memory deallocated (drop(s2) executed)'
+                    : language === 'ja'
+                    ? 'ヒープメモリ解放済み Heap memory deallocated (drop(s2) executed)'
+                    : 'Heap memory deallocated (drop(s2) executed)'}
                 </div>
               )}
 
@@ -359,7 +393,13 @@ export const OwnershipVisualizer: React.FC<VisualizerProps> = ({
               {!simulateError && step >= 1 && step < 3 && (
                 <div className="rounded-lg border border-emerald-300 bg-emerald-50/50 p-3 dark:border-emerald-700 dark:bg-emerald-950/30">
                   <div className="flex items-center justify-between text-xs font-mono text-emerald-800 dark:text-emerald-300">
-                    <span>Address: 0x1080 (Cloned buffer)</span>
+                    <span>
+                      {language === 'zh'
+                        ? 'Address: 0x1080 (克隆缓冲区 Cloned buffer)'
+                        : language === 'ja'
+                        ? 'Address: 0x1080 (クローン領域 Cloned buffer)'
+                        : 'Address: 0x1080 (Cloned buffer)'}
+                    </span>
                     <span>5 bytes</span>
                   </div>
                   <div className="mt-2 flex gap-1 font-mono text-xs">

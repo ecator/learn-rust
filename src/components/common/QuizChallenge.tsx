@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, RotateCcw, Award, Sparkles } from 'lucide-react';
 import { saveQuizResult } from '@/lib/storage';
+import { useI18n } from '@/lib/i18n';
+import { getLocalizedLesson } from '@/lib/i18n/curriculumData';
 
 export interface QuizChallengeProps {
   lessonId?: string;
@@ -8,25 +10,54 @@ export interface QuizChallengeProps {
   options?: string[];
   correctIndex?: number;
   explanation?: string;
+  challengePrompt?: string;
+  challengePrefix?: string;
+  challengeKeyword?: string;
+  challengeSuffix?: string;
+  challengeSuccess?: string;
 }
 
 export const QuizChallenge: React.FC<QuizChallengeProps> = ({
   lessonId = 'ownership-move',
-  question = 'What happens to the value in stack variable s1 when executing `let s2 = s1;` in Rust?',
-  options = [
-    'Deep copy: Both s1 and s2 own separate copies of the heap buffer.',
-    'Move semantics: Ownership transfers to s2; s1 becomes invalidated.',
-    'Shared reference: Both point to the same buffer without invalidation.',
-  ],
-  correctIndex = 1,
-  explanation = 'Rust moves ownership from s1 to s2 by shallow copying the 24-byte stack pointer and invalidating s1, preventing double-free bugs at zero runtime cost.',
+  question,
+  options,
+  correctIndex,
+  explanation,
+  challengePrompt,
+  challengePrefix,
+  challengeKeyword,
+  challengeSuffix,
+  challengeSuccess,
 }) => {
+  const { language, t } = useI18n();
+  const defaultLesson = getLocalizedLesson(lessonId, language) ?? getLocalizedLesson('ownership-move', language);
+
+  const resolvedQuestion = question ?? defaultLesson?.quiz.question ?? '';
+  const resolvedOptions = options ?? defaultLesson?.quiz.options ?? [];
+  const resolvedCorrectIndex = correctIndex ?? defaultLesson?.quiz.correctIndex ?? 1;
+  const resolvedExplanation = explanation ?? defaultLesson?.quiz.explanation ?? '';
+  const resolvedChallengePrompt =
+    challengePrompt ?? t('quiz.syntaxChallengeDesc');
+  const resolvedChallengePrefix = challengePrefix ?? 'let';
+  const resolvedChallengeKeyword = challengeKeyword ?? 'mut';
+  const resolvedChallengeSuffix = challengeSuffix ?? 'count = 0;';
+  const resolvedChallengeSuccess =
+    challengeSuccess ??
+    t('quiz.syntaxSuccess', { keyword: resolvedChallengeKeyword });
+
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [challengeInput, setChallengeInput] = useState('');
   const [challengeVerified, setChallengeVerified] = useState<boolean | null>(null);
 
-  const isCorrect = selectedIndex === correctIndex;
+  useEffect(() => {
+    setSelectedIndex(null);
+    setIsSubmitted(false);
+    setChallengeInput('');
+    setChallengeVerified(null);
+  }, [lessonId]);
+
+  const isCorrect = selectedIndex === resolvedCorrectIndex;
 
   const handleSubmit = () => {
     if (selectedIndex === null) return;
@@ -44,7 +75,7 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
   };
 
   const verifyChallenge = () => {
-    if (challengeInput.trim() === 'mut') {
+    if (challengeInput.trim() === resolvedChallengeKeyword) {
       setChallengeVerified(true);
     } else {
       setChallengeVerified(false);
@@ -60,16 +91,16 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#CE412B]">
           <Award className="h-4 w-4" />
-          <span>Knowledge Check</span>
+          <span>{t('quiz.knowledgeCheck')}</span>
         </div>
 
         <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-          {question}
+          {resolvedQuestion}
         </h3>
 
         {/* Options (Radio buttons) */}
-        <div role="radiogroup" aria-label="Quiz Options" className="space-y-2">
-          {options.map((opt, idx) => {
+        <div role="radiogroup" aria-label={t('quiz.optionsAriaLabel')} className="space-y-2">
+          {resolvedOptions.map((opt, idx) => {
             const isChecked = selectedIndex === idx;
             return (
               <button
@@ -87,7 +118,7 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
               >
                 <span>{opt}</span>
                 <span
-                  className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                  className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
                     isChecked ? 'border-[#CE412B] bg-[#CE412B]' : 'border-slate-300'
                   }`}
                 >
@@ -105,18 +136,20 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
               type="button"
               disabled={selectedIndex === null}
               onClick={handleSubmit}
+              aria-label="Submit Answer"
               className="rounded-xl bg-[#CE412B] px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#B33621] disabled:opacity-50"
             >
-              Submit Answer
+              {t('quiz.submitAnswer')}
             </button>
           ) : (
             <button
               type="button"
               onClick={handleRetry}
+              aria-label="Try Again"
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span>Try Again</span>
+              <span>{t('quiz.tryAgain')}</span>
             </button>
           )}
         </div>
@@ -133,17 +166,17 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
             <div className="flex items-center gap-2 font-bold text-sm">
               {isCorrect ? (
                 <>
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  <span>Correct! Celebration time (+20 XP) 🎉</span>
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                  <span>{t('quiz.correctMessage')}</span>
                 </>
               ) : (
                 <>
-                  <XCircle className="h-5 w-5 text-red-500" />
-                  <span>Incorrect. Review the explanation below:</span>
+                  <XCircle className="h-5 w-5 text-red-500 shrink-0" />
+                  <span>{t('quiz.incorrectMessage')}</span>
                 </>
               )}
             </div>
-            <p className="leading-relaxed">{explanation}</p>
+            <p className="leading-relaxed">{resolvedExplanation}</p>
           </div>
         )}
       </div>
@@ -152,38 +185,49 @@ export const QuizChallenge: React.FC<QuizChallengeProps> = ({
       <div className="border-t border-slate-100 dark:border-slate-800 pt-6 space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600">
           <Sparkles className="h-4 w-4" />
-          <span>Code Syntax Challenge</span>
+          <span>{t('quiz.syntaxChallengeTitle')}</span>
         </div>
 
         <p className="text-xs text-slate-600 dark:text-slate-400">
-          Make variable <code>count</code> mutable by typing the correct Rust keyword:
+          {resolvedChallengePrompt}
         </p>
 
-        <div className="flex items-center gap-2 font-mono text-xs">
-          <span>let</span>
+        <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <span>{resolvedChallengePrefix}</span>
           <input
             type="text"
             aria-label="Missing Rust keyword"
             value={challengeInput}
-            onChange={(e) => setChallengeInput(e.target.value)}
-            placeholder="keyword"
-            className="w-24 rounded-lg border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 text-center font-bold focus:ring-2 focus:ring-[#CE412B] dark:bg-slate-800"
+            onChange={(e) => {
+              setChallengeInput(e.target.value);
+              if (challengeVerified !== null) setChallengeVerified(null);
+            }}
+            placeholder={t('quiz.keywordPlaceholder')}
+            className="w-28 rounded-lg border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 text-center font-bold focus:ring-2 focus:ring-[#CE412B] dark:bg-slate-800"
           />
-          <span>count = 0;</span>
+          <span>{resolvedChallengeSuffix}</span>
 
           <button
             type="button"
             onClick={verifyChallenge}
+            aria-label="Verify"
             className="rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 font-sans text-xs font-semibold hover:opacity-90"
           >
-            Verify
+            {t('quiz.verify')}
           </button>
         </div>
 
         {challengeVerified === true && (
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Valid Rust syntax! `mut` makes bindings mutable.</span>
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>{resolvedChallengeSuccess}</span>
+          </div>
+        )}
+
+        {challengeVerified === false && (
+          <div role="alert" className="flex items-center gap-2 text-xs font-semibold text-red-600">
+            <XCircle className="h-4 w-4 shrink-0" />
+            <span>{t('quiz.syntaxFailure', { keyword: resolvedChallengeKeyword })}</span>
           </div>
         )}
       </div>

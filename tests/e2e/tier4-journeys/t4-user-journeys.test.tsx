@@ -40,52 +40,52 @@ describe('Tier 4: Real-World Application End-to-End Journeys', () => {
     expect(document.documentElement.lang).toBe('zh');
     // Views Ferris mascot greeting, hero banner, and feature overview
     expect(
-      screen.getByRole('heading', { level: 1, name: /Master Rust with/i })
+      screen.getByRole('heading', { level: 1, name: /可视化直觉[\s\S]*无畏掌握 Rust/i })
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Learn Rust Home')).toBeInTheDocument();
 
     // 2. Browse Curriculum: Clicks "Start Learning" button
-    const startLearningBtn = screen.getByRole('link', { name: /Start Learning/i });
+    const startLearningBtn = screen.getByRole('link', { name: /开始学习/i });
     expect(startLearningBtn).toBeInTheDocument();
     await user.click(startLearningBtn);
 
     // Router navigates to Curriculum overview; observes modules catalog
     expect(
-      await screen.findByRole('heading', { name: /(The Complete Rust Learning Path|Curriculum)/i })
+      await screen.findByRole('heading', { name: /Rust 完整学习路径/i })
     ).toBeInTheDocument();
-    expect(screen.getByText('Hello Ferris & Cargo Basics')).toBeInTheDocument();
-    expect(screen.getByText('Ownership & Move Semantics')).toBeInTheDocument();
+    expect(screen.getByText('你好 Ferris 与 Cargo 基础')).toBeInTheDocument();
+    expect(screen.getByText('所有权与移动语义')).toBeInTheDocument();
 
     // 3. Module 1: Clicks Module 1 ("Start Module" on first card)
-    const m01Link = screen.getAllByRole('link', { name: /Start Module/i })[0];
+    const m01Link = screen.getAllByRole('link', { name: /开始学习本节/i })[0];
     await user.click(m01Link);
 
     // Reads Cargo and fn main() code snippet
     expect(
-      await screen.findByRole('heading', { name: /Hello Ferris & Cargo Basics/i })
+      await screen.findByRole('heading', { name: /你好 Ferris 与 Cargo 基础/i })
     ).toBeInTheDocument();
     expect(screen.getByText(/fn main\(\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Hello, Ferris! 🦀/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Hello, Ferris! 🦀/i).length).toBeGreaterThan(0);
 
     // Complete Module 1 in progress
     seedCompletedLessons(['hello-ferris']);
     expect(getStoredProgress()?.completedLessons).toContain('hello-ferris');
 
     // 4. Module 3: Navigates to Ownership Deep Dive
-    const nextLessonLink = screen.getByRole('link', { name: /Next Lesson/i });
+    const nextLessonLink = screen.getByRole('link', { name: /下一节课程/i });
     await user.click(nextLessonLink);
 
     // On Module 2 (Primitives), click Next to reach Module 3 (Ownership)
-    const m03NextLink = await screen.findByRole('link', { name: /Next Lesson/i });
+    const m03NextLink = await screen.findByRole('link', { name: /下一节课程/i });
     await user.click(m03NextLink);
 
     expect(
-      await screen.findByRole('heading', { name: /Ownership & Move Semantics/i })
+      await screen.findByRole('heading', { name: /所有权与移动语义/i })
     ).toBeInTheDocument();
 
     // 5. Visualizer Interaction: Inspects move semantics explanation
     expect(
-      screen.getByText(/Ownership is Rust’s core mechanism for memory safety/i)
+      screen.getByText(/所有权（Ownership）是 Rust 无需垃圾回收器/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/COMPILE ERROR: value borrowed here after move/i)
@@ -113,21 +113,21 @@ describe('Tier 4: Real-World Application End-to-End Journeys', () => {
     const submitBtn = within(quizEl).getByRole('button', { name: /Submit Answer/i });
     await user.click(submitBtn);
 
-    expect(within(quizEl).getByRole('alert')).toHaveTextContent(/Correct! Celebration time/i);
+    expect(within(quizEl).getByRole('alert')).toHaveTextContent(/回答正确！获得 \+20 XP/i);
 
     // Mark lesson completed
-    const markCompletedBtn = screen.getByRole('button', { name: /Mark as Completed/i });
+    const markCompletedBtn = screen.getByRole('button', { name: /标记为已完成/i });
     await user.click(markCompletedBtn);
 
     // 7. Verification: Navigates to Progress dashboard
-    const progressNavLink = screen.getAllByRole('link', { name: /Progress/i })[0];
+    const progressNavLink = screen.getAllByRole('link', { name: /学习进度/i })[0];
     await user.click(progressNavLink);
 
     expect(
-      await screen.findByRole('heading', { name: /Your Learning Trajectory/i })
+      await screen.findByRole('heading', { name: /你的 Rust 学习轨迹/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/Experience Points \(XP\)/i)).toBeInTheDocument();
-    expect(screen.getByText('Level 1: Novice Crab')).toBeInTheDocument();
+    expect(screen.getByText(/经验值 \(XP\)/i)).toBeInTheDocument();
+    expect(screen.getByText('Lv.1：见习螃蟹 Rustacean')).toBeInTheDocument();
 
     const finalProgress = getStoredProgress();
     expect(finalProgress?.completedLessons).toContain('ownership-move');
@@ -234,30 +234,29 @@ describe('Tier 4: Real-World Application End-to-End Journeys', () => {
     const isWcagCompliant = assertWcagContrast('#f8fafc', '#020617', 'AAA');
     expect(isWcagCompliant).toBe(true);
 
-    // 4. Language Switching Cycle: ja -> en -> ja
-    document.documentElement.lang = 'en';
-    localStorage.setItem(STORAGE_KEY_LANG, 'en');
-    expect(document.documentElement.lang).toBe('en');
-
-    document.documentElement.lang = 'ja';
-    localStorage.setItem(STORAGE_KEY_LANG, 'ja');
-    expect(document.documentElement.lang).toBe('ja');
-
-    // 5. Visualizer on Mobile Layout
-    // Open drawer and navigate to visualizers
+    // 4. Language Switching Cycle via Mobile Drawer: ja -> en -> ja
     await user.click(hamburgerBtn);
     expect(screen.getByRole('button', { name: /Close navigation drawer/i })).toBeInTheDocument();
 
-    // Navigate to visualizers gallery
-    const visualizerLinks = screen.getAllByRole('link', { name: /Visualizers/i });
+    await user.click(screen.getByRole('button', { name: /: English$/i }));
+    expect(document.documentElement.lang).toBe('en');
+    expect(screen.getAllByRole('link', { name: /Visualizers/i }).length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('button', { name: /: 日本語$/i }));
+    expect(document.documentElement.lang).toBe('ja');
+
+    // 5. Visualizer on Mobile Layout: Navigate to visualizers gallery in Japanese
+    const visualizerLinks = screen.getAllByRole('link', { name: /シミュレーター/i });
     await user.click(visualizerLinks[0]);
 
     expect(
-      await screen.findByRole('heading', { name: /(6 Core Rust Concept Simulators|Visualizers)/i })
+      await screen.findByRole('heading', { name: /6つの核心 Rust 概念シミュレーター/i })
     ).toBeInTheDocument();
 
-    // Verify Trait Dispatch simulator on mobile
-    expect(screen.getAllByText('Trait Dispatch (Static vs Dyn)').length).toBeGreaterThan(0);
+    // Verify Trait Dispatch simulator on mobile (localized in Japanese)
+    expect(
+      screen.getAllByText('トレイトディスパッチ（静的単相化 vs 動的 VTable）').length
+    ).toBeGreaterThan(0);
 
     // 6. Persistence Verification
     expect(localStorage.getItem(STORAGE_KEY_LANG)).toBe('ja');
