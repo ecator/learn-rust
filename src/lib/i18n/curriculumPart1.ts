@@ -7,7 +7,6 @@ export const curriculumLessonsPart1: CurriculumLesson[] = [
     phaseKey: 'phase1',
     difficultyKey: 'beginner',
     iconKey: 'sparkles',
-    visualizerSlug: 'memory-layout',
     nextSlug: 'primitives-mutability',
     translations: {
       zh: {
@@ -267,7 +266,6 @@ export const curriculumLessonsPart1: CurriculumLesson[] = [
     phaseKey: 'phase1',
     difficultyKey: 'beginner',
     iconKey: 'boxes',
-    visualizerSlug: 'memory-layout',
     prevSlug: 'hello-ferris',
     nextSlug: 'ownership-move',
     translations: {

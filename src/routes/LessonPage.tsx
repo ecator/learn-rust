@@ -14,6 +14,8 @@ import {
   Terminal,
 } from 'lucide-react';
 import { RustCodeBlock } from '@/components/common/RustCodeBlock';
+import { CargoHelloVisualizer } from '@/components/visualizers/CargoHelloVisualizer';
+import { PrimitivesMutabilityVisualizer } from '@/components/visualizers/PrimitivesMutabilityVisualizer';
 import { OwnershipVisualizer } from '@/components/visualizers/OwnershipVisualizer';
 import { BorrowCheckerVisualizer } from '@/components/visualizers/BorrowCheckerVisualizer';
 import { MemoryLayoutVisualizer } from '@/components/visualizers/MemoryLayoutVisualizer';
@@ -113,31 +115,33 @@ fn main() {
 
   const renderVisualizer = () => {
     switch (currentSlug) {
+      case 'hello-ferris':
+        return <CargoHelloVisualizer key={currentSlug} />;
+      case 'primitives-mutability':
+        return <PrimitivesMutabilityVisualizer key={currentSlug} />;
       case 'ownership-move':
-        return <OwnershipVisualizer />;
+        return <OwnershipVisualizer key={currentSlug} />;
       case 'references-borrowing':
       case 'lifetimes-scopes':
-        return <BorrowCheckerVisualizer />;
+        return <BorrowCheckerVisualizer key={currentSlug} />;
       case 'slices-memory':
-      case 'hello-ferris':
-      case 'primitives-mutability':
+        return <MemoryLayoutVisualizer key={currentSlug} initialTab="slice" />;
       case 'structs-enums':
-      case 'smart-pointers':
-        return <MemoryLayoutVisualizer />;
+        return <MemoryLayoutVisualizer key={currentSlug} initialTab="padding" />;
       case 'traits-generics':
-        return <TraitDispatchVisualizer />;
+        return <TraitDispatchVisualizer key={currentSlug} />;
       case 'concurrency-mutex':
-        return <ConcurrencyVisualizer />;
+        return <ConcurrencyVisualizer key={currentSlug} />;
       case 'error-handling':
-        return <ErrorHandlingVisualizer />;
+        return <ErrorHandlingVisualizer key={currentSlug} />;
       default: {
         const visSlug = lesson.visualizerSlug;
-        if (visSlug === 'ownership') return <OwnershipVisualizer />;
-        if (visSlug === 'borrow-checker') return <BorrowCheckerVisualizer />;
-        if (visSlug === 'memory-layout') return <MemoryLayoutVisualizer />;
-        if (visSlug === 'trait-dispatch') return <TraitDispatchVisualizer />;
-        if (visSlug === 'concurrency') return <ConcurrencyVisualizer />;
-        if (visSlug === 'railway-errors') return <ErrorHandlingVisualizer />;
+        if (visSlug === 'ownership') return <OwnershipVisualizer key={currentSlug} />;
+        if (visSlug === 'borrow-checker') return <BorrowCheckerVisualizer key={currentSlug} />;
+        if (visSlug === 'memory-layout') return <MemoryLayoutVisualizer key={currentSlug} />;
+        if (visSlug === 'trait-dispatch') return <TraitDispatchVisualizer key={currentSlug} />;
+        if (visSlug === 'concurrency') return <ConcurrencyVisualizer key={currentSlug} />;
+        if (visSlug === 'railway-errors') return <ErrorHandlingVisualizer key={currentSlug} />;
         return null;
       }
     }

@@ -108,7 +108,7 @@ const visualizers: VisualizerCard[] = [
   {
     id: 'memory-layout',
     category: 'Ownership & Memory',
-    lessonSlug: 'primitives-mutability',
+    lessonSlug: 'structs-enums',
     icon: Boxes,
     color: 'from-blue-500/10 to-cyan-500/10 border-blue-500/30 text-blue-600',
     translations: {

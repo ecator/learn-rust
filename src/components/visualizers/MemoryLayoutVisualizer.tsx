@@ -4,27 +4,31 @@ import { RotateCcw, Play, Pause, ChevronLeft, ChevronRight, Bug, ShieldCheck, Al
 import { useI18n } from '@/lib/i18n';
 import { Ferris, FerrisMood } from '@/components/mascot/Ferris';
 
-export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
+const MEMORY_TABS = ['string_str', 'slice', 'vec', 'padding', 'zst'] as const;
+export type MemoryLayoutTab = (typeof MEMORY_TABS)[number];
+
+interface MemoryLayoutVisualizerProps extends VisualizerProps {
+  initialTab?: MemoryLayoutTab;
+}
+
+export const MemoryLayoutVisualizer: React.FC<MemoryLayoutVisualizerProps> = ({
   initialStep = 0,
+  initialTab,
   autoPlay = false,
   onComplete,
   className = '',
 }) => {
   const { language } = useI18n();
-  const [activeTab, setActiveTab] = useState<'string_str' | 'slice' | 'vec' | 'padding' | 'zst'>('string_str');
+  const tabs = MEMORY_TABS;
+  const resolvedInitialStep = initialTab
+    ? MEMORY_TABS.indexOf(initialTab)
+    : Math.max(0, Math.min(MEMORY_TABS.length - 1, initialStep));
+  const [activeTab, setActiveTab] = useState<MemoryLayoutTab>(tabs[resolvedInitialStep]);
   const [vecCap, setVecCap] = useState(4);
   const [vecLen, setVecLen] = useState(2);
-  const [step, setStep] = useState(initialStep);
+  const [step, setStep] = useState(resolvedInitialStep);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [simulateError, setSimulateError] = useState(false);
-
-  const tabs: Array<'string_str' | 'slice' | 'vec' | 'padding' | 'zst'> = [
-    'string_str',
-    'slice',
-    'vec',
-    'padding',
-    'zst',
-  ];
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -59,7 +63,7 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
     }
   };
 
-  const handleTabSelect = (tab: 'string_str' | 'slice' | 'vec' | 'padding' | 'zst') => {
+  const handleTabSelect = (tab: MemoryLayoutTab) => {
     setActiveTab(tab);
     setStep(tabs.indexOf(tab));
   };
@@ -75,8 +79,8 @@ export const MemoryLayoutVisualizer: React.FC<VisualizerProps> = ({
     setIsPlaying(false);
     setVecCap(4);
     setVecLen(2);
-    setStep(0);
-    setActiveTab('string_str');
+    setStep(resolvedInitialStep);
+    setActiveTab(tabs[resolvedInitialStep]);
     setSimulateError(false);
   };
 

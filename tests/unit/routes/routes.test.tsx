@@ -38,6 +38,24 @@ describe('Application Routing Tree', () => {
     expect(screen.getByText(/Interactive Code Walkthrough/i)).toBeInTheDocument();
   });
 
+  it('renders distinct interactive visualizers for hello-ferris, primitives-mutability, and structs-enums', () => {
+    const helloView = renderRoute('/lesson/hello-ferris');
+    expect(screen.getByTestId('cargo-hello-visualizer')).toBeInTheDocument();
+    expect(screen.queryByTestId('primitives-mutability-visualizer')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('memory-layout-visualizer')).not.toBeInTheDocument();
+    helloView.unmount();
+
+    const primitivesView = renderRoute('/lesson/primitives-mutability');
+    expect(screen.getByTestId('primitives-mutability-visualizer')).toBeInTheDocument();
+    expect(screen.queryByTestId('cargo-hello-visualizer')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('memory-layout-visualizer')).not.toBeInTheDocument();
+    primitivesView.unmount();
+
+    renderRoute('/lesson/structs-enums');
+    expect(screen.getByTestId('memory-layout-visualizer')).toBeInTheDocument();
+    expect(screen.getByTestId('layout-padding')).toBeInTheDocument();
+  });
+
   it('renders Visualizers Gallery on "/visualizers"', () => {
     renderRoute('/visualizers');
 

@@ -59,7 +59,7 @@ export interface CurriculumLesson {
   phaseKey: CurriculumPhaseKey;
   difficultyKey: DifficultyLevel;
   iconKey: LessonIconKey;
-  visualizerSlug: string;
+  visualizerSlug?: string;
   prevSlug?: string;
   nextSlug?: string;
   translations: Record<SupportedLanguage, LocalizedLessonContent>;
